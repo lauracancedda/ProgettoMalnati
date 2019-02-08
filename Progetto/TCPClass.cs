@@ -1,0 +1,170 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Net;
+using System.Net.Sockets;
+using System.IO;
+
+
+namespace Progetto
+{
+    class TCPClass
+    {
+        private TcpListener listener;
+        private TcpClient requester;
+        private Byte[] request;
+        private TcpClient connectedClient;
+        private NetworkStream stream;
+
+        public TCPClass()
+        {
+
+        }
+
+        public void CreateListener(IPAddress address, int port)
+        {
+            listener = new TcpListener(address, port);
+            listener.Start();
+        }
+
+        public void CreateRequester()
+        {
+            requester = new TcpClient();
+        }
+
+        public void AcceptConnection()
+        {
+            connectedClient = listener.AcceptTcpClient();
+            stream = connectedClient.GetStream();
+        }
+
+        public void CloseConnection()
+        {
+            stream.Close();
+            connectedClient.Close();
+        }
+
+        public void Connect(IPAddress address, int port)
+        {
+            requester.Connect(address, port);
+            stream = requester.GetStream();
+        }
+
+        public void SendMessage(string message)
+        {
+            byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
+            stream.Write(data, 0, data.Length);
+            Console.WriteLine("Messaggio inviato: {0}", message);
+        }
+
+        public string ReceiveMessage(int dimension)
+        {
+            request = new Byte[dimension];
+            stream.Read(request, 0, request.Length);
+            string data = System.Text.Encoding.ASCII.GetString(request, 0, request.Length);
+            Console.WriteLine("Messaggio ricevuto: {0}", data);
+            return data;
+        }
+
+        public void SendFile(byte[] file)
+        {
+            Int32 dim = file.Length;
+            byte[] dimension = BitConverter.GetBytes(dim);
+            if (BitConverter.IsLittleEndian == false)
+                Array.Reverse(dimension);
+            stream.Write(dimension, 0, dimension.Length);
+            stream.Write(file, 0, file.Length);
+            stream.Flush();
+            return;
+        }
+
+        public byte[] ReceiveFile()
+        {
+            byte[] receivedDim = new byte[4];
+            stream.Read(receivedDim, 0, receivedDim.Length);
+            if (BitConverter.IsLittleEndian == false)
+                Array.Reverse(receivedDim);
+            Console.WriteLine("dimensione ricevuta: {0}", BitConverter.ToInt32(receivedDim, 0));
+
+            byte[] file = new byte[BitConverter.ToInt32(receivedDim, 0)];
+            stream.Read(file, 0, file.Length);
+            File.WriteAllBytes("newFile.jpg", file);
+            Console.WriteLine("file ricevuto");
+   
+            return file;
+        }
+
+        public void SendFileBuffered(byte[] file, ref bool flag)
+        {
+            byte[] buffer = new byte[1024];
+            Int32 dim = file.Length;
+            int left = file.Length;
+            int offset = 0;
+
+            //invio dimensione
+            byte[] dimension = BitConverter.GetBytes(dim);
+            if (BitConverter.IsLittleEndian == false)
+                Array.Reverse(dimension);
+            stream.Write(dimension, 0, dimension.Length);
+
+            // invio file
+            while (flag == true && left > 0)
+            {
+                Array.ConstrainedCopy(file, offset, buffer, 0, 1024);
+                stream.Write(buffer, 0, buffer.Length);
+                stream.Flush();
+                offset = offset + 1024;
+                left = left - 1024;
+            }
+
+            // controllo se tutto il file è stato inviato
+            if (offset < dim)
+                throw new Exception("Invio interrotto");
+            return;
+        }
+
+
+        public byte[] ReceiveFileBuffered(string filename)          //non è detto che serva il filename
+        {
+            byte[] buffer = new byte[1024];
+            byte[] receivedDim = new byte[4];
+            byte[] file;
+            Int32 dim;
+            int received = 0;
+
+            // ricezione dimensione
+            stream.Read(receivedDim, 0, receivedDim.Length);
+            if (BitConverter.IsLittleEndian == false)
+                Array.Reverse(receivedDim);
+            Console.WriteLine("dimensione ricevuta: {0}", BitConverter.ToInt32(receivedDim, 0));
+            dim = BitConverter.ToInt32(receivedDim, 0);
+            file = new byte[BitConverter.ToInt32(receivedDim, 0)];
+
+            // ricezione file
+            stream.ReadTimeout = 1000;
+            while (received < dim && stream.DataAvailable)
+            {
+                stream.Read(buffer, 0, buffer.Length);
+                Array.ConstrainedCopy(buffer, 0, file, received, 1024);
+                received = received + 1024;
+            }
+
+            // controllo se tutto il file è stato inviato
+            if (received < dim)
+                throw new Exception("Invio interrotto");
+            else
+            {
+                File.WriteAllBytes(filename, file);
+                Console.WriteLine("file ricevuto");
+            }
+
+            return file;
+        }
+
+    }
+}
+
+
