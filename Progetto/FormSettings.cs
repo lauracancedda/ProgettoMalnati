@@ -89,27 +89,27 @@ namespace Progetto
             setting.mutex_setting.WaitOne(); //lock
 
             // nome
-            setting.set_name(Name.Text);
+            setting.Name = Name.Text;
             // foto
-            setting.set_photo(Photo.Image);
+            setting.Photo = Photo.Image;
             if (photo_modified == true)
-                setting.set_photo_selected(true);
+                setting.PhotoSelected = true;
             // percorso di default
-            setting.set_default_path(Path.Text);
+            setting.DefaultPath = Path.Text;
             if (Path.Text != "")
-                setting.set_default_selected(true);
+                setting.DefaultSelected = true;
             else
-                setting.set_default_selected(false);
+                setting.DefaultSelected = false;
             // ricezione automatica
             if (AutomaticReceive.Checked)
-                setting.set_automatic_receive(true);
+                setting.AutomaticReceive = true;
             else
-                setting.set_automatic_receive(false);
+                setting.AutomaticReceive = false;
             // modalità 
             if (PrivateMode.Checked)
-                setting.set_private_mode(true);
+                setting.PrivateMode = true;
             else
-                setting.set_private_mode(false);
+                setting.PrivateMode = false;
 
             // scrittura su file se qualcosa è cambiato 
             if (file_modified == true || photo_modified == true)
@@ -158,7 +158,7 @@ namespace Progetto
             {
                 Photo.Image = new Bitmap(".\\immagine.jpg");
                 setting.mutex_setting.WaitOne();
-                setting.set_photo_selected(true);
+                setting.PhotoSelected = true;
                 setting.mutex_setting.ReleaseMutex();
                 photo_modified = true;
             }
@@ -173,13 +173,13 @@ namespace Progetto
                 // in ordine: nome, default, ricezione automatica("yes"/""), modalità("yes"/"")
                 File.Create("configurazione.txt").Close();
                 StreamWriter writer = File.AppendText("configurazione.txt"); ;
-                writer.WriteLine(setting.get_name());
-                writer.WriteLine(setting.get_default_path());
-                if (setting.get_automatic_receive() == true)
+                writer.WriteLine(setting.Name);
+                writer.WriteLine(setting.DefaultPath);
+                if (setting.AutomaticReceive == true)
                     writer.WriteLine("yes");
                 else
                     writer.WriteLine("");
-                if (setting.get_private_mode() == true)
+                if (setting.PrivateMode == true)
                     writer.WriteLine("yes");
                 else
                     writer.WriteLine("");

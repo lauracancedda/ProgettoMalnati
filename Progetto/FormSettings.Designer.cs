@@ -128,7 +128,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(41, 269);
+            this.label3.Location = new System.Drawing.Point(38, 269);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(344, 20);
             this.label3.TabIndex = 7;
@@ -137,7 +137,7 @@
             // ChooseFolder
             // 
             this.ChooseFolder.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.ChooseFolder.Location = new System.Drawing.Point(429, 269);
+            this.ChooseFolder.Location = new System.Drawing.Point(429, 260);
             this.ChooseFolder.Name = "ChooseFolder";
             this.ChooseFolder.Size = new System.Drawing.Size(115, 40);
             this.ChooseFolder.TabIndex = 8;
@@ -191,19 +191,19 @@
             this.openToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.Menu.Name = "contextMenuStrip1";
-            this.Menu.Size = new System.Drawing.Size(113, 56);
+            this.Menu.Size = new System.Drawing.Size(107, 52);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(112, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(106, 24);
             this.openToolStripMenuItem.Text = "Apri";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(112, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(106, 24);
             this.exitToolStripMenuItem.Text = "Esci";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
@@ -211,7 +211,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(610, 501);
+            this.ClientSize = new System.Drawing.Size(610, 514);
             this.ControlBox = false;
             this.Controls.Add(this.Path);
             this.Controls.Add(this.Save);
@@ -224,6 +224,7 @@
             this.Controls.Add(this.Browse);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.Name = "FormSettings";
             this.Text = "Impostazioni";
             this.Load += new System.EventHandler(this.FormSettings_Load);
             ((System.ComponentModel.ISupportInitialize)(this.Photo)).EndInit();

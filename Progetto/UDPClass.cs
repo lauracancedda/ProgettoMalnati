@@ -55,6 +55,11 @@ namespace Progetto
 
             return val;
         }
+
+        public void receiveConnectionRequest()
+        {
+
+        }
     }
 }
 

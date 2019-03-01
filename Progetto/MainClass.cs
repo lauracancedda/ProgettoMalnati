@@ -52,13 +52,13 @@ namespace Progetto
             receiveMulticast = new Thread(ReceivePresentations);
             manageMap = new Thread(CheckMap);
             sendImageUnicast = new Thread(ProvidePhoto);
-            // aggiungere ricezione
+            receiveUnicast = new Thread(ReceiveConnections);
 
             sendMulticast.Start();
             receiveMulticast.Start();
             manageMap.Start();
             sendImageUnicast.Start();
-            //ricezione.Start();
+            receiveUnicast.Start();
         }
 
 
@@ -85,13 +85,15 @@ namespace Progetto
             value v;
             if (usersMap.ContainsKey(ip))
             {
-                //utente presente, quindi aggiorno il suo timestamp nella mappa
+                //utente presente, quindi aggiorno il suo timestamp nella mappa ed eventualmente il nome
                 usersMap.TryGetValue(ip, out v);
                 v.time = DateTime.Now;
+                if (val.name != v.name)
+                    v.name = val.name;
             }
             else
             {
-                //Utente non presente       // val è un riferimento???
+                //Utente non presente
                 v.name = val.name;
                 v.time = val.time;
                 v.photo = null;
@@ -139,9 +141,9 @@ namespace Progetto
             udp.Bind();
             while (true)
             {
-                if (setting.get_private_mode() == false)
+                if (setting.PrivateMode == false)
                 {
-                    udp.SendPacket(setting.get_name());
+                    udp.SendPacket(setting.Name);
                 }
                 Thread.Sleep(5000);
             }
@@ -151,17 +153,18 @@ namespace Progetto
         // invia l'immagine a chi la richiede
         void ProvidePhoto()
         {
+            // questo thread dovrebbe lavorare solo in modalità pubblica, come sendPresentation
             TCPClass tcp = new TCPClass();
             tcp.CreateListener(IPAddress.Any, 1600);
             while (true)
             {
                 tcp.AcceptConnection();
                 tcp.ReceiveMessage(14);
-                if (setting.get_foto_selected() == true)
+                if (setting.PhotoSelected == true)
                 {
                     tcp.SendMessage("ok");
                     MemoryStream ms = new MemoryStream();
-                    setting.get_foto().Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    setting.Photo.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
                     tcp.SendFile(ms.ToArray());
                 }
                 else
@@ -169,6 +172,40 @@ namespace Progetto
                     tcp.SendMessage("no");
                 }
                 tcp.CloseConnection();
+            }
+        }
+
+        // riceve le richieste di connessione e lancia un thread per ogni ricezione file
+        void ReceiveConnections()
+        {
+            // questo thread dovrebbe lavorare solo in modalità pubblica, come sendPresentation
+            string path;
+            UDPClass udp = new UDPClass();
+            udp.Bind(); //su porta casuale da comunicare!!!
+
+            while (true)
+            {
+                udp.receiveConnectionRequest();
+                if (setting.AutomaticReceive == false)
+                {
+                    //mostrare form confirmreceive
+                    // in caso negativo inviare NO e poi continue
+                }
+                //inviare OK
+
+                if (setting.DefaultSelected == false)
+                {
+                    //mostrare form selezionaPath
+                }
+                else
+                {
+                    path = setting.DefaultPath;
+                }
+
+                //verifica unicità path
+
+                //sgancia thread ricezione tcp
+
             }
         }
     }

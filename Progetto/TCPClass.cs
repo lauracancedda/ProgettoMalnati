@@ -30,11 +30,6 @@ namespace Progetto
             listener.Start();
         }
 
-        public void CreateRequester()
-        {
-            requester = new TcpClient();
-        }
-
         public void AcceptConnection()
         {
             connectedClient = listener.AcceptTcpClient();
@@ -45,6 +40,11 @@ namespace Progetto
         {
             stream.Close();
             connectedClient.Close();
+        }
+
+        public void CreateRequester()
+        {
+            requester = new TcpClient();
         }
 
         public void Connect(IPAddress address, int port)
@@ -71,7 +71,7 @@ namespace Progetto
 
         public void SendFile(byte[] file)
         {
-            Int32 dim = file.Length;
+            Int64 dim = file.Length;
             byte[] dimension = BitConverter.GetBytes(dim);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(dimension);
@@ -83,15 +83,15 @@ namespace Progetto
 
         public byte[] ReceiveFile()
         {
-            byte[] receivedDim = new byte[4];
+            byte[] receivedDim = new byte[8];
             stream.Read(receivedDim, 0, receivedDim.Length);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(receivedDim);
-            Console.WriteLine("dimensione ricevuta: {0}", BitConverter.ToInt32(receivedDim, 0));
+            Console.WriteLine("dimensione ricevuta: {0}", BitConverter.ToInt64(receivedDim, 0));
 
-            byte[] file = new byte[BitConverter.ToInt32(receivedDim, 0)];
+            byte[] file = new byte[BitConverter.ToInt64(receivedDim, 0)];
             stream.Read(file, 0, file.Length);
-            File.WriteAllBytes("newFile.jpg", file);
+            //File.WriteAllBytes("newFile.jpg", file);
             Console.WriteLine("file ricevuto");
    
             return file;
@@ -100,7 +100,7 @@ namespace Progetto
         public void SendFileBuffered(byte[] file, ref bool flag)
         {
             byte[] buffer = new byte[1024];
-            Int32 dim = file.Length;
+            Int64 dim = file.Length;
             int left = file.Length;
             int offset = 0;
 
@@ -130,26 +130,27 @@ namespace Progetto
         public byte[] ReceiveFileBuffered(string filename)          //non è detto che serva il filename
         {
             byte[] buffer = new byte[1024];
-            byte[] receivedDim = new byte[4];
+            byte[] receivedDim = new byte[8];
             byte[] file;
-            Int32 dim;
+            Int64 dim;
             int received = 0;
+            int nRead;
 
             // ricezione dimensione
             stream.Read(receivedDim, 0, receivedDim.Length);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(receivedDim);
-            Console.WriteLine("dimensione ricevuta: {0}", BitConverter.ToInt32(receivedDim, 0));
-            dim = BitConverter.ToInt32(receivedDim, 0);
-            file = new byte[BitConverter.ToInt32(receivedDim, 0)];
-
+            dim = BitConverter.ToInt64(receivedDim, 0);
+            file = new byte[dim];
+            Console.WriteLine("dimensione ricevuta: {0}", dim);
+            
             // ricezione file
             stream.ReadTimeout = 1000;
             while (received < dim && stream.DataAvailable)
             {
-                stream.Read(buffer, 0, buffer.Length);
-                Array.ConstrainedCopy(buffer, 0, file, received, 1024);
-                received = received + 1024;
+                nRead = stream.Read(buffer, 0, buffer.Length);
+                Array.ConstrainedCopy(buffer, 0, file, received, nRead);
+                received = received + nRead;
             }
 
             // controllo se tutto il file è stato inviato
