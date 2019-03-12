@@ -11,9 +11,9 @@ namespace Progetto
     public class UDPClass
     {
         private IPAddress ipMulticast;          //Ip Gruppo Multicast
-        private UdpClient client;               //client che si occupa di inviare/ricevere il nome al gruppo
-        private IPEndPoint remoteEndPoint;      //Ip e porta per inviare il nome
-        private IPEndPoint anyEndPoint;         //Ip e porta per ricevere il nome
+        private UdpClient client;               //client che si occupa di inviare/ricevere la presentazione al gruppo
+        private IPEndPoint remoteEndPoint;      //Ip e porta per inviare la presentazione
+        private IPEndPoint anyEndPoint;         //Ip e porta per ricevere la presentazione
 
 
         public UDPClass()
@@ -29,15 +29,18 @@ namespace Progetto
             client.JoinMulticastGroup(ipMulticast);
         }
 
-        public void Bind()
+        // Crea un UDPClient associato a una porta libera e ritorna la porta usata
+        public int Bind()
         {
-            client = new UdpClient(0);      // porta casuale
+            client = new UdpClient(0);
+            int portUsed = ((IPEndPoint)client.Client.LocalEndPoint).Port;
+            return portUsed;
         }
 
-        //Invia al gruppo multicast la stringa nome
-        public void SendPacket(string name)
+        //Invia al gruppo multicast la stringa nome_portImage_portRequest
+        public void SendPacketMulticast(string s)
         {
-            Byte[] data = Encoding.ASCII.GetBytes(name);
+            Byte[] data = Encoding.ASCII.GetBytes(s);
             client.Send(data, data.Length, remoteEndPoint);
         }
 
@@ -45,18 +48,24 @@ namespace Progetto
         // Riceve le informazioni da chiunque sia iscritto al gruppo multicast e le inserisce nella struct valore
         public value ReceiveWrapPacket()
         {
-            Byte[] received;
             value val;
-            received = client.Receive(ref anyEndPoint);
-            val.name = Encoding.ASCII.GetString(received);
+            Byte[] received = client.Receive(ref anyEndPoint);
+            string s = Encoding.ASCII.GetString(received);
+            string[] values = s.Split('_');
+
             val.time = DateTime.Now;
+            val.name = values[0];
             val.ip = anyEndPoint.Address;      //non so se sia l'indirizzo del mittente o del multicast
             val.photo = null;
+            val.portImage = Int32.Parse(values[1]);
+            val.portRequest = Int32.Parse(values[2]);
+
+            Console.WriteLine("Nome: {0}, portImage: {1}, portRequest: {2}", val.name, val.portImage, val.portRequest);
 
             return val;
         }
 
-        public void receiveConnectionRequest()
+        public void ReceiveConnectionRequest()
         {
 
         }

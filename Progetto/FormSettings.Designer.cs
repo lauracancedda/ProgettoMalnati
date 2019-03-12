@@ -33,7 +33,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.Browse = new System.Windows.Forms.Button();
-            this.Name = new System.Windows.Forms.TextBox();
+            this.Username = new System.Windows.Forms.TextBox();
             this.Photo = new System.Windows.Forms.PictureBox();
             this.AutomaticReceive = new System.Windows.Forms.CheckBox();
             this.PrivateMode = new System.Windows.Forms.CheckBox();
@@ -43,12 +43,12 @@
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.Folder = new System.Windows.Forms.FolderBrowserDialog();
             this.Path = new System.Windows.Forms.Label();
-            this.Icon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.Menu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.NotificationIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.AppMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.Photo)).BeginInit();
-            this.Menu.SuspendLayout();
+            this.AppMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -82,14 +82,14 @@
             this.Browse.UseVisualStyleBackColor = false;
             this.Browse.Click += new System.EventHandler(this.Browse_Click);
             // 
-            // Name
+            // Username
             // 
-            this.Name.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name.Location = new System.Drawing.Point(195, 42);
-            this.Name.Name = "Name";
-            this.Name.Size = new System.Drawing.Size(234, 27);
-            this.Name.TabIndex = 3;
-            this.Name.TextChanged += new System.EventHandler(this.Name_TextChanged);
+            this.Username.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Username.Location = new System.Drawing.Point(195, 42);
+            this.Username.Name = "Username";
+            this.Username.Size = new System.Drawing.Size(234, 27);
+            this.Username.TabIndex = 3;
+            this.Username.TextChanged += new System.EventHandler(this.Username_TextChanged);
             // 
             // Photo
             // 
@@ -177,33 +177,35 @@
             this.Path.Size = new System.Drawing.Size(350, 17);
             this.Path.TabIndex = 10;
             // 
-            // Icon
+            // NotificationIcon
             // 
-            this.Icon.Icon = ((System.Drawing.Icon)(resources.GetObject("Icon.Icon")));
-            this.Icon.Text = "Sharing";
-            this.Icon.Visible = true;
+            this.NotificationIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("NotificationIcon.Icon")));
+            this.NotificationIcon.Text = "Sharing";
+            this.NotificationIcon.Visible = true;
             // 
-            // Menu
+            // AppMenu
             // 
-            this.Menu.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.Menu.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.Menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.AppMenu.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.AppMenu.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.AppMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.AppMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
             this.exitToolStripMenuItem});
-            this.Menu.Name = "contextMenuStrip1";
-            this.Menu.Size = new System.Drawing.Size(107, 52);
+            this.AppMenu.Name = "contextMenuStrip1";
+            this.AppMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.AppMenu.Size = new System.Drawing.Size(176, 80);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(106, 24);
-            this.openToolStripMenuItem.Text = "Apri";
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+            this.openToolStripMenuItem.Text = "Impostazioni";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(106, 24);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
             this.exitToolStripMenuItem.Text = "Esci";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
@@ -220,7 +222,7 @@
             this.Controls.Add(this.PrivateMode);
             this.Controls.Add(this.AutomaticReceive);
             this.Controls.Add(this.Photo);
-            this.Controls.Add(this.Name);
+            this.Controls.Add(this.Username);
             this.Controls.Add(this.Browse);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -228,7 +230,7 @@
             this.Text = "Impostazioni";
             this.Load += new System.EventHandler(this.FormSettings_Load);
             ((System.ComponentModel.ISupportInitialize)(this.Photo)).EndInit();
-            this.Menu.ResumeLayout(false);
+            this.AppMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -239,7 +241,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button Browse;
-        private System.Windows.Forms.TextBox Name;
+        private System.Windows.Forms.TextBox Username;
         private System.Windows.Forms.PictureBox Photo;
         private System.Windows.Forms.CheckBox AutomaticReceive;
         private System.Windows.Forms.CheckBox PrivateMode;
@@ -249,8 +251,8 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.FolderBrowserDialog Folder;
         private System.Windows.Forms.Label Path;
-        private System.Windows.Forms.NotifyIcon Icon;
-        private System.Windows.Forms.ContextMenuStrip Menu;
+        private System.Windows.Forms.NotifyIcon NotificationIcon;
+        private System.Windows.Forms.ContextMenuStrip AppMenu;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     }

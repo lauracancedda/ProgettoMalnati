@@ -23,7 +23,7 @@ namespace Progetto
         public FormSettings()
         {
             InitializeComponent();
-            Icon.ContextMenuStrip = Menu;
+            NotificationIcon.ContextMenuStrip = AppMenu;
             setting = new Settings();
         }
 
@@ -40,10 +40,10 @@ namespace Progetto
             photo_modified = false;
         }
 
-        private void Name_TextChanged(object sender, EventArgs e)
+        private void Username_TextChanged(object sender, EventArgs e)
         {
             // se il nome non è stato inserito non si può salvare
-            if (Name.TextLength > 0)
+            if (Username.TextLength > 0)
                 Save.Enabled = true;
             else
                 Save.Enabled = false;
@@ -89,7 +89,7 @@ namespace Progetto
             setting.mutex_setting.WaitOne(); //lock
 
             // nome
-            setting.Name = Name.Text;
+            setting.Name = Username.Text;
             // foto
             setting.Photo = Photo.Image;
             if (photo_modified == true)
@@ -134,7 +134,7 @@ namespace Progetto
             StreamReader reader = File.OpenText("configurazione.txt");
             // il nome c'è sicuramente
             string line = reader.ReadLine();
-            Name.Text = line;
+            Username.Text = line;
             // percorso di default
             line = reader.ReadLine();
             Path.Text = line;

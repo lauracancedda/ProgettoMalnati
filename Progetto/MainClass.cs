@@ -12,11 +12,13 @@ using System.IO;
 namespace Progetto
 {
     public struct value
-        {
+    {
         public DateTime time;
         public string name;
         public Image photo;
         public IPAddress ip;
+        public Int32 portImage;
+        public Int32 portRequest;
     }
     class MainClass
     {
@@ -48,17 +50,28 @@ namespace Progetto
         // thread principale, lancia 5 thread statici
         public void Start()
         {
+            // listener TCP utilizzato in ProvidePhoto
+            TCPClass imageSender = new TCPClass();
+            int imagePort = imageSender.CreateListener(IPAddress.Any, 0);
+
+            // receiver UDP utilizzato in ReceiveConnections
+            UDPClass connectionReceiver = new UDPClass();
+            int requestPort = connectionReceiver.Bind();
+
+            // porte utilizzate da comunicare in SendPresentation
+            string ports = imagePort + "_" + requestPort;
+
+            sendImageUnicast = new Thread(ProvidePhoto);
+            receiveUnicast = new Thread(ReceiveConnections);
             sendMulticast = new Thread(SendPresentation);
             receiveMulticast = new Thread(ReceivePresentations);
             manageMap = new Thread(CheckMap);
-            sendImageUnicast = new Thread(ProvidePhoto);
-            receiveUnicast = new Thread(ReceiveConnections);
 
-            sendMulticast.Start();
+            sendImageUnicast.Start(imageSender);
+            receiveUnicast.Start(connectionReceiver);
+            sendMulticast.Start(ports);
             receiveMulticast.Start();
             manageMap.Start();
-            sendImageUnicast.Start();
-            receiveUnicast.Start();
         }
 
 
@@ -98,11 +111,13 @@ namespace Progetto
                 v.time = val.time;
                 v.photo = null;
                 v.ip = ip;
+                v.portImage = val.portImage;
+                v.portRequest = val.portRequest;
 
                 //richiedo la foto
                 TCPClass tcpclass = new TCPClass();
                 tcpclass.CreateRequester();
-                tcpclass.Connect(ip, 1600);
+                tcpclass.Connect(ip, val.portImage);
 
                 tcpclass.SendMessage("Richiesta Foto");
 
@@ -134,8 +149,8 @@ namespace Progetto
             }
         }
 
-        // invia in multicast il proprio nome ogni 5 secondi
-        public void SendPresentation()
+        // invia in multicast la presentazione name_portImage_portRequest ogni 5 secondi
+        public void SendPresentation(object ports)
         {
             UDPClass udp = new UDPClass();
             udp.Bind();
@@ -143,7 +158,7 @@ namespace Progetto
             {
                 if (setting.PrivateMode == false)
                 {
-                    udp.SendPacket(setting.Name);
+                    udp.SendPacketMulticast(setting.Name.Trim('_') + "_" + (string)ports);
                 }
                 Thread.Sleep(5000);
             }
@@ -151,41 +166,39 @@ namespace Progetto
 
 
         // invia l'immagine a chi la richiede
-        void ProvidePhoto()
+        void ProvidePhoto(object imageSender)
         {
             // questo thread dovrebbe lavorare solo in modalità pubblica, come sendPresentation
-            TCPClass tcp = new TCPClass();
-            tcp.CreateListener(IPAddress.Any, 1600);
+            TCPClass tcpImageSender = (TCPClass)imageSender;
             while (true)
             {
-                tcp.AcceptConnection();
-                tcp.ReceiveMessage(14);
+                tcpImageSender.AcceptConnection();
+                tcpImageSender.ReceiveMessage(14);
                 if (setting.PhotoSelected == true)
                 {
-                    tcp.SendMessage("ok");
+                    tcpImageSender.SendMessage("ok");
                     MemoryStream ms = new MemoryStream();
                     setting.Photo.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                    tcp.SendFile(ms.ToArray());
+                    tcpImageSender.SendFile(ms.ToArray());
                 }
                 else
                 {
-                    tcp.SendMessage("no");
+                    tcpImageSender.SendMessage("no");
                 }
-                tcp.CloseConnection();
+                tcpImageSender.CloseConnection();
             }
         }
 
         // riceve le richieste di connessione e lancia un thread per ogni ricezione file
-        void ReceiveConnections()
+        void ReceiveConnections(object receiver)
         {
             // questo thread dovrebbe lavorare solo in modalità pubblica, come sendPresentation
             string path;
-            UDPClass udp = new UDPClass();
-            udp.Bind(); //su porta casuale da comunicare!!!
+            UDPClass udpConnectionsReceiver = (UDPClass)receiver;
 
             while (true)
             {
-                udp.receiveConnectionRequest();
+                udpConnectionsReceiver.ReceiveConnectionRequest();
                 if (setting.AutomaticReceive == false)
                 {
                     //mostrare form confirmreceive

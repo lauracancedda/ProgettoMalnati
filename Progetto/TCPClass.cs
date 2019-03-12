@@ -24,10 +24,17 @@ namespace Progetto
 
         }
 
-        public void CreateListener(IPAddress address, int port)
+        public int CreateListener(IPAddress address, int port)
         {
+            int portUsed = port;
             listener = new TcpListener(address, port);
             listener.Start();
+
+            if(port == 0)
+                portUsed = ((IPEndPoint)listener.LocalEndpoint).Port;
+
+            Console.WriteLine("Porta tcp usata: {0}", portUsed);
+            return portUsed;
         }
 
         public void AcceptConnection()
@@ -40,6 +47,11 @@ namespace Progetto
         {
             stream.Close();
             connectedClient.Close();
+        }
+
+        public void StopListener()
+        {
+            listener.Stop();
         }
 
         public void CreateRequester()
