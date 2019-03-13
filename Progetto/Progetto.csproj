@@ -54,11 +54,23 @@
     <Compile Include="FormConfirmReceive.Designer.cs">
       <DependentUpon>FormConfirmReceive.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormSelectPath.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSelectPath.Designer.cs">
+      <DependentUpon>FormSelectPath.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormSettings.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormSettings.Designer.cs">
       <DependentUpon>FormSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSharing.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSharing.Designer.cs">
+      <DependentUpon>FormSharing.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="MainClass.cs" />
@@ -69,8 +81,14 @@
     <EmbeddedResource Include="FormConfirmReceive.resx">
       <DependentUpon>FormConfirmReceive.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormSelectPath.resx">
+      <DependentUpon>FormSelectPath.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormSettings.resx">
       <DependentUpon>FormSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSharing.resx">
+      <DependentUpon>FormSharing.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -150,28 +150,28 @@ namespace Progetto
         }
 
         // invia in multicast la presentazione name_portImage_portRequest ogni 5 secondi
+        // solo in modalità pubblica
         public void SendPresentation(object ports)
         {
             UDPClass udp = new UDPClass();
             udp.Bind();
             while (true)
             {
-                if (setting.PrivateMode == false)
-                {
-                    udp.SendPacketMulticast(setting.Name.Trim('_') + "_" + (string)ports);
-                }
+                setting.publicMode.WaitOne();
+                udp.SendPacketMulticast(setting.Name.Trim('_') + "_" + (string)ports);
                 Thread.Sleep(5000);
             }
         }
 
 
         // invia l'immagine a chi la richiede
+        // solo in modalità pubblica
         void ProvidePhoto(object imageSender)
         {
-            // questo thread dovrebbe lavorare solo in modalità pubblica, come sendPresentation
             TCPClass tcpImageSender = (TCPClass)imageSender;
             while (true)
             {
+                setting.publicMode.WaitOne();
                 tcpImageSender.AcceptConnection();
                 tcpImageSender.ReceiveMessage(14);
                 if (setting.PhotoSelected == true)
@@ -190,14 +190,15 @@ namespace Progetto
         }
 
         // riceve le richieste di connessione e lancia un thread per ogni ricezione file
+        // solo in modalità pubblica
         void ReceiveConnections(object receiver)
         {
-            // questo thread dovrebbe lavorare solo in modalità pubblica, come sendPresentation
             string path;
             UDPClass udpConnectionsReceiver = (UDPClass)receiver;
 
             while (true)
             {
+                setting.publicMode.WaitOne();
                 udpConnectionsReceiver.ReceiveConnectionRequest();
                 if (setting.AutomaticReceive == false)
                 {

@@ -23,9 +23,18 @@ namespace Progetto
         {
             get; set;
         }
+
+        private bool _privateMode;
         public bool PrivateMode
         {
-            get; set;
+            get { return _privateMode; }
+            set {
+                _privateMode = value;
+                if (value == true)
+                    publicMode.Reset();
+                else
+                    publicMode.Set();
+            }
         }
         public bool AutomaticReceive
         {
@@ -44,11 +53,13 @@ namespace Progetto
 
         // Mutex
         public Mutex mutex_setting;
+        public ManualResetEvent publicMode;
 
 
         public Settings()
         {
             mutex_setting = new Mutex();
+            publicMode = new ManualResetEvent(false);
         }
 
     }
