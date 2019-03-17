@@ -12,13 +12,12 @@ namespace Progetto
 {
     public partial class FormConfirmReceive : Form
     {
-        bool choice;
+        private bool choice;
 
         public FormConfirmReceive(string name)
         {
             InitializeComponent();
             this.RequestText.Text = name + " vorrebbe inviarti un file:";
-
         }
 
         public bool GetChoice()
@@ -29,11 +28,13 @@ namespace Progetto
         private void Accept_Click(object sender, EventArgs e)
         {
             choice = true;
+            this.Close();
         }
 
         private void Refuse_Click(object sender, EventArgs e)
         {
             choice = false;
+            this.Close();
         }
     }
 }

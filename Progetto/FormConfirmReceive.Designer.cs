@@ -46,7 +46,8 @@
             // 
             // Accept
             // 
-            this.Accept.Location = new System.Drawing.Point(103, 124);
+            this.Accept.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Accept.Location = new System.Drawing.Point(102, 108);
             this.Accept.Name = "Accept";
             this.Accept.Size = new System.Drawing.Size(95, 34);
             this.Accept.TabIndex = 2;
@@ -56,7 +57,8 @@
             // 
             // Refuse
             // 
-            this.Refuse.Location = new System.Drawing.Point(366, 124);
+            this.Refuse.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Refuse.Location = new System.Drawing.Point(367, 108);
             this.Refuse.Name = "Refuse";
             this.Refuse.Size = new System.Drawing.Size(95, 34);
             this.Refuse.TabIndex = 3;
@@ -68,7 +70,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(555, 207);
+            this.ClientSize = new System.Drawing.Size(555, 191);
             this.Controls.Add(this.Refuse);
             this.Controls.Add(this.Accept);
             this.Controls.Add(this.RequestText);

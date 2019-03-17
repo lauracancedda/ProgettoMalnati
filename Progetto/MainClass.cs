@@ -199,25 +199,66 @@ namespace Progetto
             while (true)
             {
                 setting.publicMode.WaitOne();
-                udpConnectionsReceiver.ReceiveConnectionRequest();
+                IPEndPoint remote = udpConnectionsReceiver.ReceiveConnectionRequest();
+                if (remote == null)
+                    continue;
+                // cerca il nome nella mappa, presente se il richiedente è in publicMode
+                value requester;
+                string reqName;
+                if (usersMap.TryGetValue(remote.Address, out requester) == true)
+                    reqName = requester.name;
+                else
+                    reqName = "Un utente privato";
+
+                // chiede conferma di ricezione se non è automatica
                 if (setting.AutomaticReceive == false)
                 {
-                    //mostrare form confirmreceive
-                    // in caso negativo inviare NO e poi continue
+                    FormConfirmReceive form1 = new FormConfirmReceive(reqName);
+                    form1.Show();
+                    if(form1.GetChoice() == false)
+                    {
+                        udpConnectionsReceiver.SendPacket("NO", remote);
+                        continue;
+                    }
                 }
-                //inviare OK
+
+                // ricezione automatica o accettata; riceve nome e tipo file
+                udpConnectionsReceiver.SendPacket("YES", remote);
+                string filename = udpConnectionsReceiver.ReceivePacket(remote);
+                string type = udpConnectionsReceiver.ReceivePacket(remote);
 
                 if (setting.DefaultSelected == false)
                 {
-                    //mostrare form selezionaPath
+                    FormSelectPath form2 = new FormSelectPath(filename);
+                    path = form2.GetPath();
                 }
                 else
                 {
                     path = setting.DefaultPath;
                 }
 
-                //verifica unicità path
+                //verifica unicità path ed eventualmente lo modifica
+                path = path + "/" + filename;
+                int count = 0;
+                string modifiedPath = path;
+                if (type == "File")
+                {
+                    while (File.Exists(modifiedPath) == true)
+                    {
+                        modifiedPath = path + "(" + count + ")";
+                        count++;
+                    }
+                }
+                else
+                {
+                    while (Directory.Exists(modifiedPath) == true)
+                    {
+                        modifiedPath = path + "(" + count + ")";
+                        count++;
+                    }
+                }
 
+                //crea tcp receiver e invia la porta scelta
                 //sgancia thread ricezione tcp
 
             }

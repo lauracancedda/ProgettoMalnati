@@ -12,10 +12,11 @@ namespace Progetto
 {
     public partial class FormSelectPath : Form
     {
-        string path;
-        public FormSelectPath()
+        private string path;
+        public FormSelectPath(string filename)
         {
             InitializeComponent();
+            this.SelectText.Text = "Seleziona la cartella di destinazione per " + filename;
         }
 
         private void ChooseFolder_Click(object sender, EventArgs e)
@@ -24,7 +25,12 @@ namespace Progetto
             {
                 path = Folder.SelectedPath;
             }
-            this.Visible = false;
+            this.Close();
+        }
+
+        public string GetPath()
+        {
+            return path;
         }
     }
 }

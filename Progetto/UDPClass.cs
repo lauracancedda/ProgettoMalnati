@@ -37,13 +37,27 @@ namespace Progetto
             return portUsed;
         }
 
-        //Invia al gruppo multicast la stringa nome_portImage_portRequest
+        // Invia al gruppo multicast la stringa nome_portImage_portRequest
         public void SendPacketMulticast(string s)
         {
             Byte[] data = Encoding.ASCII.GetBytes(s);
             client.Send(data, data.Length, remoteEndPoint);
         }
 
+        // Invia il messaggio al destinatario specificato
+        public void SendPacket(string s, IPEndPoint dest)
+        {
+            Byte[] data = Encoding.ASCII.GetBytes(s);
+            client.Send(data, data.Length, dest);
+        }
+
+        // Riceve un messaggio dal mittente
+        public string ReceivePacket(IPEndPoint remote)
+        {
+            Byte[] received = client.Receive(ref remote);
+            string s = Encoding.ASCII.GetString(received);
+            return s;
+        }
 
         // Riceve le informazioni da chiunque sia iscritto al gruppo multicast e le inserisce nella struct valore
         public value ReceiveWrapPacket()
@@ -65,9 +79,21 @@ namespace Progetto
             return val;
         }
 
-        public void ReceiveConnectionRequest()
+        public IPEndPoint ReceiveConnectionRequest()
         {
+            //permette di ricevere datagram da ogni sorgente
+            IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
+            //bloccante finché non arriva un messaggio dall'host remoto
+            Byte[] receivedBytes = client.Receive(ref RemoteIpEndPoint);
+            string received = Encoding.ASCII.GetString(receivedBytes);
+
+            if (received == "Richiesta Invio")
+            {
+                return RemoteIpEndPoint;
+            }
+            else
+                return null;
         }
     }
 }
