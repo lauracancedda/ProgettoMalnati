@@ -13,7 +13,7 @@ namespace Progetto
 {
     public partial class FormSharing : Form
     {
-        private Dictionary<IPAddress, value> OnlineUsers;
+        private Dictionary<IPAddress, Value> OnlineUsers;
         //private Dictionary<IPAddress, value> SelectedUsers;
         private List<visualization> userselected;
         struct visualization
@@ -22,16 +22,16 @@ namespace Progetto
             public PictureBox picture;
             public Label label;
             public CheckBox checkbox;
-            public value val;
+            public Value val;
 
         }
-        public FormSharing(Dictionary<IPAddress, value> OnlineUsers1)
+        public FormSharing(Dictionary<IPAddress, Value> OnlineUsers1)
         {
             InitializeComponent();
             OnlineUsers = OnlineUsers1;
             userselected = new List<visualization>();
             // Lock Map - Read Map - Create form for each element into the map
-            foreach (KeyValuePair<IPAddress, value> entry in OnlineUsers1)
+            foreach (KeyValuePair<IPAddress, Value> entry in OnlineUsers1)
             {
                 //entry.Value...
                 // visualizzare gli users, quindi crere il form adatto
@@ -62,7 +62,7 @@ namespace Progetto
         {
             int x, y;
             x = 1; y = 1;//Per poter disporre i vari layout utente
-            foreach (KeyValuePair<IPAddress, value> entry in OnlineUsers)
+            foreach (KeyValuePair<IPAddress, Value> entry in OnlineUsers)
             {
                 visualization v1;
 

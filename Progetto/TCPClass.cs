@@ -11,7 +11,7 @@ using System.IO;
 
 namespace Progetto
 {
-    class TCPClass
+    public class TCPClass
     {
         private TcpListener listener;
         private TcpClient requester;
@@ -139,14 +139,18 @@ namespace Progetto
         }
 
 
-        public byte[] ReceiveFileBuffered(string filename)          //non è detto che serva il filename
+        public void ReceiveFileBuffered(object f)
         {
+            string filename = (string)f;
             byte[] buffer = new byte[1024];
             byte[] receivedDim = new byte[8];
             byte[] file;
             Int64 dim;
             int received = 0;
             int nRead;
+
+            // connessione
+            AcceptConnection();
 
             // ricezione dimensione
             stream.Read(receivedDim, 0, receivedDim.Length);
@@ -174,7 +178,10 @@ namespace Progetto
                 Console.WriteLine("file ricevuto");
             }
 
-            return file;
+            CloseConnection();
+            StopListener();
+
+            return;
         }
 
     }

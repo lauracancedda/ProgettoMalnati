@@ -60,9 +60,9 @@ namespace Progetto
         }
 
         // Riceve le informazioni da chiunque sia iscritto al gruppo multicast e le inserisce nella struct valore
-        public value ReceiveWrapPacket()
+        public Value ReceiveWrapPacket()
         {
-            value val;
+            Value val;
             Byte[] received = client.Receive(ref anyEndPoint);
             string s = Encoding.ASCII.GetString(received);
             string[] values = s.Split('_');

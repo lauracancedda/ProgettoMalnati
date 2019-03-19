@@ -11,7 +11,7 @@ using System.IO;
 
 namespace Progetto
 {
-    public struct value
+    public struct Value
     {
         public DateTime time;
         public string name;
@@ -20,10 +20,11 @@ namespace Progetto
         public Int32 portImage;
         public Int32 portRequest;
     }
+
     class MainClass
     {
         private Settings setting;
-        private Dictionary<IPAddress, value> usersMap;
+        private Dictionary<IPAddress, Value> usersMap;
         private Mutex mutex_map;
         private Thread sendMulticast;
         private Thread receiveMulticast;
@@ -35,7 +36,7 @@ namespace Progetto
         {
             setting = s;
             mutex_map = new Mutex();
-            usersMap = new Dictionary<IPAddress, value>();
+            usersMap = new Dictionary<IPAddress, Value>();
         }
 
         ~MainClass()
@@ -81,7 +82,7 @@ namespace Progetto
             while (true)
             {
                 mutex_map.WaitOne();
-                foreach (KeyValuePair<IPAddress, value> entry in usersMap)
+                foreach (KeyValuePair<IPAddress, Value> entry in usersMap)
                 {
                     if ((DateTime.Now.Millisecond - entry.Value.time.Millisecond) > 5000)
                     {
@@ -93,9 +94,9 @@ namespace Progetto
             }
            
         }
-        public void MapRefresh(IPAddress ip, value val)
+        public void MapRefresh(IPAddress ip, Value val)
         {
-            value v;
+            Value v;
             if (usersMap.ContainsKey(ip))
             {
                 //utente presente, quindi aggiorno il suo timestamp nella mappa ed eventualmente il nome
@@ -142,7 +143,7 @@ namespace Progetto
             //Accettare i nuovi utenti ed eventualmente aggiornare la Mappa
             while (true)
             {
-                value v=udp.ReceiveWrapPacket();
+                Value v=udp.ReceiveWrapPacket();
                 mutex_map.WaitOne();
                 MapRefresh(v.ip, v);
                 mutex_map.ReleaseMutex();
@@ -203,7 +204,7 @@ namespace Progetto
                 if (remote == null)
                     continue;
                 // cerca il nome nella mappa, presente se il richiedente è in publicMode
-                value requester;
+                Value requester;
                 string reqName;
                 if (usersMap.TryGetValue(remote.Address, out requester) == true)
                     reqName = requester.name;
@@ -258,9 +259,13 @@ namespace Progetto
                     }
                 }
 
-                //crea tcp receiver e invia la porta scelta
-                //sgancia thread ricezione tcp
+                //crea tcp receiver e invia la porta scelta con udp
+                TCPClass tcpReceiver = new TCPClass();
+                int tcpPort = tcpReceiver.CreateListener(IPAddress.Any, 0);
+                udpConnectionsReceiver.SendPacket(tcpPort.ToString(), remote);
 
+                //sgancia thread ricezione tcp
+                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, filename);
             }
         }
     }
