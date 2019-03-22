@@ -268,5 +268,21 @@ namespace Progetto
                 ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, filename);
             }
         }
+
+        public void showFormSharing()
+        {
+            string pathbefore = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
+            while (string.Compare(pathbefore, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) == 0)
+            {
+                Thread.Sleep(1);
+            }
+            string pathnew = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
+            //MessageBox.Show(pathnew);
+            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
+            FormSharing share = new FormSharing(usersMap, pathnew, setting);
+            Application.Run(share);
+
+        }
+
     }
 }

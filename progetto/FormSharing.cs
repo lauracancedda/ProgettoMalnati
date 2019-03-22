@@ -25,7 +25,7 @@ namespace Progetto
             public Value val;
 
         }
-        public FormSharing(Dictionary<IPAddress, Value> OnlineUsers1)
+        public FormSharing(Dictionary<IPAddress, Value> OnlineUsers1, string file, Settings setting)
         {
             InitializeComponent();
             OnlineUsers = OnlineUsers1;

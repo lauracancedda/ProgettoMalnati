@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Drawing;
+using Microsoft.Win32;
 
 namespace Progetto
 {
@@ -60,6 +61,26 @@ namespace Progetto
         {
             mutex_setting = new Mutex();
             publicMode = new ManualResetEvent(false);
+        }
+
+        public void SetKeyRegedit(string pathexecutable)
+        {
+            try
+            {
+                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\*\shell\ShareApplication2", "Icon", null) == null)
+                {
+                    Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("*", true).
+                    OpenSubKey("shell", true).CreateSubKey("ShareApplication2").SetValue("Icon", "\"" + pathexecutable + "\"");
+                    Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("*", true).
+                        OpenSubKey("shell", true).OpenSubKey("ShareApplication2", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
+
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("{0} Exception caught.", e);
+            }
+
         }
 
     }
