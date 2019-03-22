@@ -8,6 +8,7 @@ using System.Data;
 using System.Threading;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Progetto
 {
@@ -284,5 +285,41 @@ namespace Progetto
 
         }
 
+        public void SendConnection(object sender,string filename)
+        {
+            //Send to each userselected the pathfile
+            UDPClass udpConnectionsSender = (UDPClass)sender;
+            while (true)
+            {
+                IPEndPoint send = new IPEndPoint(Int32.Parse(sender.ToString()), 0);
+
+                udpConnectionsSender.SendPacket("SEND FILE", send);
+
+                string receiveaccess = udpConnectionsSender.ReceivePacket(send);
+                if (string.Compare(receiveaccess,"YES") == 0)
+                {
+                    //Invio del file
+                    TCPClass tcp = new TCPClass();
+                    tcp.CreateRequester();
+                    tcp.Connect(send.Address, send.Port);
+                    byte[] bytes = System.IO.File.ReadAllBytes(filename);
+                     bool t = true; 
+                    tcp.SendFileBuffered(bytes,ref t);
+                }
+                else
+                {
+                    //Invio rifiutato
+                }
+
+            }
+        }
+
+        public void SendFile(Dictionary<IPAddress, Value> UserToSend,string filename)
+        {
+            foreach (KeyValuePair<IPAddress, Value> entry in UserToSend)
+            {
+                this.SendConnection((object) entry.Key);
+            }
+        }
     }
 }
