@@ -133,8 +133,8 @@ namespace Progetto
                     UserToSend.Add(x.val.ip, x.val);
                 }
             }
-            main2.SendConnection(UserToSend, filename);
-            
+            main2.SendFile(UserToSend, filename);
+
         }
     }
 }

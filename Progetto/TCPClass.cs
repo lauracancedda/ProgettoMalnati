@@ -122,7 +122,8 @@ namespace Progetto
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
 
-            // invio file
+            // invio file e gestiore stato invio
+            FormStatusFile formstatusfile = new FormStatusFile(0);
             while (flag == true && left > 0)
             {
                 Array.ConstrainedCopy(file, offset, buffer, 0, 1024);
@@ -130,12 +131,17 @@ namespace Progetto
                 stream.Flush();
                 offset = offset + 1024;
                 left = left - 1024;
+                if (formstatusfile.ChangeStatus(offset) == -1)
+                {
+                    //Annullare l invio del file
+                    flag = false;
+                }
             }
 
             // controllo se tutto il file è stato inviato
             if (offset < dim)
                 throw new Exception("Invio interrotto");
-            return;
+            return;/**/
         }
 
 
