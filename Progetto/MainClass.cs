@@ -32,7 +32,7 @@ namespace Progetto
         private Thread manageMap;
         private Thread sendImageUnicast;
         private Thread receiveUnicast;
-
+        private List<Value> userToSendFile;
         public MainClass(Settings s)
         {
             setting = s;
@@ -293,7 +293,11 @@ namespace Progetto
 
             while (true)
             {
-                IPEndPoint send = new IPEndPoint(Int32.Parse(sender.ToString()), 0);
+                Value user = userToSendFile.LastOrDefault();
+                UDPClass udp = new UDPClass();
+                udp.MulticastSubscription();
+
+                IPEndPoint send = new IPEndPoint(user.ip, udp.Bind());
                 udpConnectionsSender.SendPacket("SEND FILE", send);
                 string receiveaccess = udpConnectionsSender.ReceivePacket(send);
                 if (string.Compare(receiveaccess, "YES") == 0)
@@ -319,9 +323,14 @@ namespace Progetto
 
         public void SendFile(Dictionary<IPAddress, Value> UserToSend, string filename)
         {
+            userToSendFile = new List<Value>();
+            
             foreach (KeyValuePair<IPAddress, Value> entry in UserToSend)
             {
+                //mutex
+                userToSendFile.Add(entry.Value);
                 ThreadPool.QueueUserWorkItem(this.SendConnection, filename);
+                
             }
         }
     }

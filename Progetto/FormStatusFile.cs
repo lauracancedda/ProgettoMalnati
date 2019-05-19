@@ -13,10 +13,13 @@ namespace Progetto
     public partial class FormStatusFile : Form
     {
         private bool status = true;
-        public FormStatusFile(int statusFile)
+
+        private int dimfile;
+        public FormStatusFile(int statusFile,int dimension)
         {
             InitializeComponent();
-            progressBar1.Value = statusFile % 100;
+            progressBar1.Value = statusFile ;
+            dimfile = dimension;
 
         }
 
@@ -34,12 +37,15 @@ namespace Progetto
         {
         }
 
-        public int ChangeStatus(int x)
+        public int ChangeStatus(int sizefilesend)
         {
-            progressBar1.Value = x % 100;
+            //standardizzare sizefilesend su 1000, come max value of progressbar
+            progressBar1.Value = (progressBar1.Maximum*sizefilesend)/dimfile;
             if (status == false)
             {
                 //ANNULLA INVIO
+                MessageBox.Show("Invio Cancel!");
+                //this.Close();
                 return -1;
             }
             return 0;

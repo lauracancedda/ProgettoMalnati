@@ -36,7 +36,7 @@ namespace Progetto
 
 
             MessageBox.Show("HELLO");
-            IPAddress ip1 = IPAddress.Parse("10.0.0.1");
+            IPAddress ip1 = IPAddress.Parse("192.168.1.35");
             IPAddress ip2 = IPAddress.Parse("10.0.0.2");
             IPAddress ip3 = IPAddress.Parse("10.0.1.1");
             Value v1 = new Value();

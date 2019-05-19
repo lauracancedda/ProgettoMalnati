@@ -122,8 +122,8 @@ namespace Progetto
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
 
-            // invio file e gestiore stato invio
-            FormStatusFile formstatusfile = new FormStatusFile(0);
+            // invio file e gestiore stato invio,
+            FormStatusFile formstatusfile = new FormStatusFile(0, dimension.Length);
             while (flag == true && left > 0)
             {
                 Array.ConstrainedCopy(file, offset, buffer, 0, 1024);
