@@ -32,6 +32,7 @@ namespace Progetto
         private Thread manageMap;
         private Thread sendImageUnicast;
         private Thread receiveUnicast;
+        private Thread shareForm;
         private List<Value> userToSendFile;
         public MainClass(Settings s)
         {
@@ -69,11 +70,16 @@ namespace Progetto
             receiveMulticast = new Thread(ReceivePresentations);
             manageMap = new Thread(CheckMap);
 
+            //
+            shareForm = new Thread(showFormSharing);
+
             sendImageUnicast.Start(imageSender);
             receiveUnicast.Start(connectionReceiver);
             sendMulticast.Start(ports);
             receiveMulticast.Start();
             manageMap.Start();
+
+            shareForm.Start();
         }
 
 

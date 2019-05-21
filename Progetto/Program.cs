@@ -20,7 +20,7 @@ namespace Progetto
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.EnableVisualStyles();
-            /*Application.SetCompatibleTextRenderingDefault(false);
+            Application.SetCompatibleTextRenderingDefault(false);
 
             if (Environment.GetCommandLineArgs().Length == 1)
             {
@@ -32,10 +32,10 @@ namespace Progetto
                 //FormSharing
                 string[] args = Environment.GetCommandLineArgs();
                 System.Environment.SetEnvironmentVariable("envvar", args[1], EnvironmentVariableTarget.User);
-            }*/
+            }
 
 
-            MessageBox.Show("HELLO");
+            /*MessageBox.Show("HELLO");
             IPAddress ip1 = IPAddress.Parse("192.168.1.35");
             IPAddress ip2 = IPAddress.Parse("10.0.0.2");
             IPAddress ip3 = IPAddress.Parse("10.0.1.1");
@@ -58,7 +58,7 @@ namespace Progetto
             test.Add(ip1, v1); test.Add(ip2, v2); test.Add(ip3, v3);
             FormSharing share = new FormSharing(test, "TEST", null);
             Application.Run(share);
-
+            */
 
         }
 

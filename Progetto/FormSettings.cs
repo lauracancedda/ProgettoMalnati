@@ -125,6 +125,9 @@ namespace Progetto
                 t = new Thread(main.Start);
                 t.Start();
             }
+
+            setting.SetKeyRegedit("C:\\Users\\lucio\\Documents\\ProgettoMalnati\\ProgettoMalnati-correct\\Progetto\\bin\\Debug\\Progetto.exe");
+
             this.Visible = false;
         }
 
