@@ -29,6 +29,13 @@ namespace Progetto
             client.JoinMulticastGroup(ipMulticast);
         }
 
+        public void MulticastSubscription2()
+        {
+            client = new UdpClient(1501);    // porta del multicast per poter ricevere
+            client.JoinMulticastGroup(ipMulticast);
+        }
+
+
         // Crea un UDPClient associato a una porta libera e ritorna la porta usata
         public int Bind()
         {

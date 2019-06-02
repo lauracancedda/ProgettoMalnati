@@ -1,0 +1,9 @@
+Invio di foto con tcp Test -> DONE
+Testare ricezione photo e visualizzazione, misa che manca il path della foto dove salvare sta puta foto!!!
+
+
+
+Nell invio dei file c'è la stessa logica della foto, solo che si mandano messaggi udp per dire la porta libera, 
+se non funzione (probabile) farlo con tcp ossia come la immagine, con la stessa logica quindi inviare test con TCP per dire la porta libera ( NOO )
+
+DEVI PER FORZA USARE UPD per sapere la porta e poi con tcp ti connetti!!!

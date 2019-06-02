@@ -112,7 +112,7 @@ namespace Progetto
         public void SendFileBuffered(byte[] file, ref bool flag)
         {
             byte[] buffer = new byte[1024];
-            Int64 dim = file.Length;
+            int dim = file.Length;
             int left = file.Length;
             int offset = 0;
 
@@ -123,7 +123,7 @@ namespace Progetto
             stream.Write(dimension, 0, dimension.Length);
 
             // invio file e gestiore stato invio,
-            FormStatusFile formstatusfile = new FormStatusFile(0, dimension.Length);
+            FormStatusFile formstatusfile = new FormStatusFile(0, dim);
             while (flag == true && left > 0)
             {
                 Array.ConstrainedCopy(file, offset, buffer, 0, 1024);

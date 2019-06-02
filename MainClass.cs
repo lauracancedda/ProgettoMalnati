@@ -181,7 +181,7 @@ namespace Progetto
             {
                 setting.publicMode.WaitOne();
                 tcpImageSender.AcceptConnection();
-                tcpImageSender.ReceiveMessage(14);
+                string messreceive = tcpImageSender.ReceiveMessage(14); //FORSE NON SERVE QUESTO!
                 if (setting.PhotoSelected == true)
                 {
                     tcpImageSender.SendMessage("ok");
