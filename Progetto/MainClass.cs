@@ -8,6 +8,7 @@ using System.Data;
 using System.Threading;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Progetto
 {
@@ -31,7 +32,7 @@ namespace Progetto
         private Thread manageMap;
         private Thread sendImageUnicast;
         private Thread receiveUnicast;
-
+        private List<Value> userToSendFile;
         public MainClass(Settings s)
         {
             setting = s;
@@ -92,7 +93,7 @@ namespace Progetto
                 mutex_map.ReleaseMutex();
                 Thread.Sleep(4000);
             }
-           
+
         }
         public void MapRefresh(IPAddress ip, Value val)
         {
@@ -143,7 +144,7 @@ namespace Progetto
             //Accettare i nuovi utenti ed eventualmente aggiornare la Mappa
             while (true)
             {
-                Value v=udp.ReceiveWrapPacket();
+                Value v = udp.ReceiveWrapPacket();
                 mutex_map.WaitOne();
                 MapRefresh(v.ip, v);
                 mutex_map.ReleaseMutex();
@@ -216,7 +217,7 @@ namespace Progetto
                 {
                     FormConfirmReceive form1 = new FormConfirmReceive(reqName);
                     form1.Show();
-                    if(form1.GetChoice() == false)
+                    if (form1.GetChoice() == false)
                     {
                         udpConnectionsReceiver.SendPacket("NO", remote);
                         continue;
@@ -284,5 +285,53 @@ namespace Progetto
 
         }
 
+        public void SendConnection(object sender)
+        {
+            //Send to each userselected the pathfile
+            string filename = (string)sender;
+            UDPClass udpConnectionsSender = new UDPClass();
+
+            while (true)
+            {
+                Value user = userToSendFile.LastOrDefault();
+                UDPClass udp = new UDPClass();
+                udp.MulticastSubscription();
+
+                IPEndPoint send = new IPEndPoint(user.ip, udp.Bind());
+                udpConnectionsSender.SendPacket("SEND FILE", send);
+                string receiveaccess = udpConnectionsSender.ReceivePacket(send);
+                if (string.Compare(receiveaccess, "YES") == 0)
+                {
+                    //Invio del file
+                    TCPClass tcp = new TCPClass();
+                    tcp.CreateRequester();
+                    tcp.Connect(send.Address, send.Port);
+                    byte[] bytes = System.IO.File.ReadAllBytes(filename);
+                    bool t = true;
+                    tcp.SendFileBuffered(bytes, ref t);
+                    //GESTIRE CON Exception la chiusura del thred in caso l invio del file è stato annullato!
+                }
+                else
+                {
+                    //Invio rifiutato
+                    MessageBox.Show("User has rejected the File!");
+                    continue;
+                }
+
+            }
+        }
+
+        public void SendFile(Dictionary<IPAddress, Value> UserToSend, string filename)
+        {
+            userToSendFile = new List<Value>();
+
+            foreach (KeyValuePair<IPAddress, Value> entry in UserToSend)
+            {
+                //mutex
+                userToSendFile.Add(entry.Value);
+                ThreadPool.QueueUserWorkItem(this.SendConnection, filename);
+
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,6 +17,10 @@ namespace Progetto
         private Dictionary<IPAddress, Value> OnlineUsers;
         //private Dictionary<IPAddress, value> SelectedUsers;
         private List<visualization> userselected;
+        private Mutex mutex_map;
+        private string filename = "";
+        private MainClass main2;
+        private Settings Setting;
         struct visualization
         {
             public FlowLayoutPanel layout;
@@ -30,27 +35,33 @@ namespace Progetto
             InitializeComponent();
             OnlineUsers = OnlineUsers1;
             userselected = new List<visualization>();
+            filename = file;
+            Setting = setting;
+            mutex_map = new Mutex();
+            mutex_map.WaitOne(); // mutex sulla mappa degl utenti, per poterli visualizzare
             // Lock Map - Read Map - Create form for each element into the map
             foreach (KeyValuePair<IPAddress, Value> entry in OnlineUsers1)
             {
-                //entry.Value...
-                // visualizzare gli users, quindi crere il form adatto
+                //Modelling the ShareForm
                 Console.WriteLine(entry.Value.name.ToString());
                 FlowLayoutPanel flp1 = new FlowLayoutPanel();
                 CheckBox cb1 = new CheckBox();
                 cb1.Text = entry.Value.name.ToString();
                 cb1.Enabled = true;
                 cb1.Visible = true;
-
-
                 flp1.Controls.Add(cb1); // checksbox1
                 flp1.TabIndex = 1;
             }
+            mutex_map.ReleaseMutex();
+            //Create the same thread to allow user to send another file later
+            main2 = new MainClass(setting);
+            Thread t2 = new Thread(main2.showFormSharing);
+            t2.Start();
         }
 
         private void FormSharing_Load(object sender, EventArgs e)
         {
-            
+
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -62,15 +73,15 @@ namespace Progetto
         {
             int x, y;
             x = 1; y = 1;//Per poter disporre i vari layout utente
+            mutex_map = new Mutex();
+            mutex_map.WaitOne(); // mutex sulla mappa degl utenti, per poterli visualizzare
             foreach (KeyValuePair<IPAddress, Value> entry in OnlineUsers)
             {
                 visualization v1;
-
                 //Nome UTente
                 v1.label = new Label();
                 v1.label.Text = entry.Value.name;
                 v1.label.Name = entry.Value.name;
-
                 //Image Utente
                 v1.picture = new PictureBox();
                 v1.picture.Name = "Im1";
@@ -107,32 +118,23 @@ namespace Progetto
                 }
 
             }
+            mutex_map.ReleaseMutex();
+
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            string s = "";
+            // Send filename to selected users
+            Dictionary<IPAddress, Value> UserToSend = new Dictionary<IPAddress, Value>();
             foreach (visualization x in userselected)
             {
                 if (x.checkbox.Checked)
                 {
-                    s += x.val.name + x.val.ip.ToString() + " - ";
-                    int porta = 150;
-                    bool r = true;
-                    //SGANGIARE THREDD PER OGNI INVIO FILE!!!
-                    TCPClass tcp = new TCPClass();
-                    //tcp.Connect(x.val.ip, porta);
-                    //openFileDialog1.ShowDialog();
-                    //var result = dialog.ShowDialog();
-                    //if (result != DialogResult.OK)
-                    //    return;//
-                    //byte[] file = System.IO.File.ReadAllBytes(openFileDialog1.FileName);
-                    //tcp.SendFileBuffered(file,ref r);
-                    //CREARE FORM PER SAPERE STATO CONNESSIONE usando il metodo di TCPCLASS StatusSendFile()
+                    UserToSend.Add(x.val.ip, x.val);
                 }
             }
-            label1.Text = s;
-            
+            main2.SendFile(UserToSend, filename);
+
         }
     }
 }

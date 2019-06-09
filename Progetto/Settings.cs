@@ -29,7 +29,8 @@ namespace Progetto
         public bool PrivateMode
         {
             get { return _privateMode; }
-            set {
+            set
+            {
                 _privateMode = value;
                 if (value == true)
                     publicMode.Reset();

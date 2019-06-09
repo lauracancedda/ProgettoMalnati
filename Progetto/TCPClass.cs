@@ -30,7 +30,7 @@ namespace Progetto
             listener = new TcpListener(address, port);
             listener.Start();
 
-            if(port == 0)
+            if (port == 0)
                 portUsed = ((IPEndPoint)listener.LocalEndpoint).Port;
 
             Console.WriteLine("Porta tcp usata: {0}", portUsed);
@@ -105,7 +105,7 @@ namespace Progetto
             stream.Read(file, 0, file.Length);
             //File.WriteAllBytes("newFile.jpg", file);
             Console.WriteLine("file ricevuto");
-   
+
             return file;
         }
 
@@ -122,7 +122,8 @@ namespace Progetto
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
 
-            // invio file
+            // invio file e gestiore stato invio,
+            FormStatusFile formstatusfile = new FormStatusFile(0, dimension.Length);
             while (flag == true && left > 0)
             {
                 Array.ConstrainedCopy(file, offset, buffer, 0, 1024);
@@ -130,12 +131,17 @@ namespace Progetto
                 stream.Flush();
                 offset = offset + 1024;
                 left = left - 1024;
+                if (formstatusfile.ChangeStatus(offset) == -1)
+                {
+                    //Annullare l invio del file
+                    flag = false;
+                }
             }
 
             // controllo se tutto il file è stato inviato
             if (offset < dim)
                 throw new Exception("Invio interrotto");
-            return;
+            return;/**/
         }
 
 
@@ -159,7 +165,7 @@ namespace Progetto
             dim = BitConverter.ToInt64(receivedDim, 0);
             file = new byte[dim];
             Console.WriteLine("dimensione ricevuta: {0}", dim);
-            
+
             // ricezione file
             stream.ReadTimeout = 1000;
             while (received < dim && stream.DataAvailable)
