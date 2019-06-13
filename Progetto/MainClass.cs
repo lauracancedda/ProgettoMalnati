@@ -35,7 +35,8 @@ namespace Progetto
         private Thread shareForm;
         private List<Value> userToSendFile;
         private string pathsendfile = "";
-        public MainClass(Settings s)
+
+        public MainClass(ref Settings s)
         {
             setting = s;
             mutex_map = new Mutex();
@@ -303,15 +304,11 @@ namespace Progetto
 
         public void showFormSharing()
         {
+            //Rivedere questo loop!
+
             while (true)
             {
-                //string pathbefore = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
-                /*while (string.Compare(pathbefore, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) == 0)
-                {
-                    Thread.Sleep(1);
-                }*/
-
-        
+                
 
                 if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
                 {
@@ -320,6 +317,7 @@ namespace Progetto
                     System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
                     FormSharing share = new FormSharing(usersMap, pathsendfile, setting);
                     Application.Run(share);
+
                 }
                 Thread.Sleep(2000);
             }
@@ -337,11 +335,14 @@ namespace Progetto
             {
                 Value user = userToSendFile.LastOrDefault();
                 UDPClass udp = new UDPClass();
-                udp.MulticastSubscription2();
+                udpConnectionsSender.MulticastSubscription();
+
+                //udpConnectionsSender.MulticastSubscription2();
 
                 IPEndPoint send = new IPEndPoint(user.ip, udp.Bind());
                 udpConnectionsSender.SendPacket("SEND FILE", send);
-                string receiveaccess = udpConnectionsSender.ReceivePacket(send);
+                //string receiveaccess = udpConnectionsSender.ReceivePacket(send);
+                string receiveaccess = udp.ReceivePacket(send);
                 if (string.Compare(receiveaccess, "YES") == 0)
                 {
                     //Invio del file
@@ -365,7 +366,7 @@ namespace Progetto
 
         public void SendFile(Dictionary<IPAddress, Value> UserToSend, string filename)
         {
-            // CHE es sta roba??
+            //STA ROBA NON VA BENE
             userToSendFile = new List<Value>();
             
             foreach (KeyValuePair<IPAddress, Value> entry in UserToSend)

@@ -65,15 +65,16 @@ namespace Progetto
 
         public void SetKeyRegedit(string pathexecutable)
         {
-            //File
+            //Set the Path-process to the Registry. To be able to open a file or a directory
             try
             {
-                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\*\shell\ShareApplication2", "Icon", null) == null)
+                //File
+                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\*\shell\SendFileMalnati", "Icon", null) == null)
                 {
                     Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("*", true).
-                    OpenSubKey("shell", true).CreateSubKey("ShareApplication2").SetValue("Icon", "\"" + pathexecutable + "\"");
+                    OpenSubKey("shell", true).CreateSubKey("SendFileMalnati").SetValue("Icon", "\"" + pathexecutable + "\"");
                     Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("*", true).
-                        OpenSubKey("shell", true).OpenSubKey("ShareApplication2", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
+                        OpenSubKey("shell", true).OpenSubKey("SendFileMalnati", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
 
                 }
             }
@@ -84,12 +85,12 @@ namespace Progetto
             //Directory
             try
             {
-                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Directory\shell\ShareApplication2", "Icon", null) == null)
+                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Directory\shell\SendFileMalnati", "Icon", null) == null)
                 {
                     Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("Directory",true).
-                    OpenSubKey("shell", true).CreateSubKey("ShareApplication2").SetValue("Icon", "\"" + pathexecutable + "\"");
+                    OpenSubKey("shell", true).CreateSubKey("SendFileMalnati").SetValue("Icon", "\"" + pathexecutable + "\"");
                     Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("Directory", true).
-                        OpenSubKey("shell", true).OpenSubKey("ShareApplication2", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
+                        OpenSubKey("shell", true).OpenSubKey("SendFileMalnati", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
 
                 }
             }

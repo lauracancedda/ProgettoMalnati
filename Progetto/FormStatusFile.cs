@@ -39,11 +39,11 @@ namespace Progetto
 
         public int ChangeStatus(int sizefilesend)
         {
-            //standardizzare sizefilesend su 1000, come max value of progressbar
+            //Normalize better this value LUCIO! 
             progressBar1.Value = (progressBar1.Maximum*sizefilesend)/dimfile;
             if (status == false)
             {
-                //ANNULLA INVIO
+                //Send Cancel
                 MessageBox.Show("Invio Cancel!");
                 //this.Close();
                 return -1;
@@ -51,7 +51,9 @@ namespace Progetto
             return 0;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+  
+
+        private void button1_Click_1(object sender, EventArgs e)
         {
             status = false;
             this.Close();

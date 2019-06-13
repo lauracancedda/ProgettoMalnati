@@ -83,6 +83,7 @@ namespace Progetto
 
         public void SendFile(byte[] file)
         {
+            //Understand why the tcp connection fail 
             Int64 dim = file.Length;
             byte[] dimension = BitConverter.GetBytes(dim);
             if (BitConverter.IsLittleEndian == false)
@@ -95,6 +96,7 @@ namespace Progetto
 
         public byte[] ReceiveFile()
         {
+            //Understand why the tcp connection fail 
             byte[] receivedDim = new byte[8];
             stream.Read(receivedDim, 0, receivedDim.Length);
             if (BitConverter.IsLittleEndian == false)
@@ -116,13 +118,13 @@ namespace Progetto
             int left = file.Length;
             int offset = 0;
 
-            //invio dimensione
+            //send size
             byte[] dimension = BitConverter.GetBytes(dim);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
 
-            // invio file e gestiore stato invio,
+            // Send File - Manage send view
             FormStatusFile formstatusfile = new FormStatusFile(0, dim);
             while (flag == true && left > 0)
             {
@@ -133,12 +135,12 @@ namespace Progetto
                 left = left - 1024;
                 if (formstatusfile.ChangeStatus(offset) == -1)
                 {
-                    //Annullare l invio del file
+                    //Cancel Send File
                     flag = false;
                 }
             }
 
-            // controllo se tutto il file è stato inviato
+            // Check if the file is upload
             if (offset < dim)
                 throw new Exception("Invio interrotto");
             return;/**/

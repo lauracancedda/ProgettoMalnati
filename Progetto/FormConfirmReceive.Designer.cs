@@ -38,18 +38,20 @@
             this.RequestText.AccessibleName = "testoRichiesta";
             this.RequestText.AutoSize = true;
             this.RequestText.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.RequestText.Location = new System.Drawing.Point(141, 39);
+            this.RequestText.Location = new System.Drawing.Point(106, 32);
+            this.RequestText.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.RequestText.Name = "RequestText";
-            this.RequestText.Size = new System.Drawing.Size(289, 24);
+            this.RequestText.Size = new System.Drawing.Size(223, 18);
             this.RequestText.TabIndex = 0;
             this.RequestText.Text = "L\'utente x vorrebbe inviarti un file:";
             // 
             // Accept
             // 
             this.Accept.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Accept.Location = new System.Drawing.Point(102, 108);
+            this.Accept.Location = new System.Drawing.Point(76, 88);
+            this.Accept.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Accept.Name = "Accept";
-            this.Accept.Size = new System.Drawing.Size(95, 34);
+            this.Accept.Size = new System.Drawing.Size(71, 28);
             this.Accept.TabIndex = 2;
             this.Accept.Text = "Accetta";
             this.Accept.UseVisualStyleBackColor = true;
@@ -58,9 +60,10 @@
             // Refuse
             // 
             this.Refuse.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Refuse.Location = new System.Drawing.Point(367, 108);
+            this.Refuse.Location = new System.Drawing.Point(275, 88);
+            this.Refuse.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Refuse.Name = "Refuse";
-            this.Refuse.Size = new System.Drawing.Size(95, 34);
+            this.Refuse.Size = new System.Drawing.Size(71, 28);
             this.Refuse.TabIndex = 3;
             this.Refuse.Text = "Rifiuta";
             this.Refuse.UseVisualStyleBackColor = true;
@@ -68,14 +71,16 @@
             // 
             // FormConfirmReceive
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(555, 191);
+            this.ClientSize = new System.Drawing.Size(416, 155);
             this.Controls.Add(this.Refuse);
             this.Controls.Add(this.Accept);
             this.Controls.Add(this.RequestText);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "FormConfirmReceive";
             this.Text = "Ricezione file";
+            this.Load += new System.EventHandler(this.FormConfirmReceive_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

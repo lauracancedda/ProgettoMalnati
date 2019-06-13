@@ -36,5 +36,10 @@ namespace Progetto
             choice = false;
             this.Close();
         }
+
+        private void FormConfirmReceive_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

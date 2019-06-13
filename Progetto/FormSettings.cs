@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace Progetto
 {
@@ -121,13 +122,16 @@ namespace Progetto
             // lancia il thread principale
             if (t == null)
             {
-                main = new MainClass(setting);
+                main = new MainClass(ref setting);
                 t = new Thread(main.Start);
                 t.Start();
             }
 
-            setting.SetKeyRegedit("C:\\Users\\lucio\\Documents\\ProgettoMalnati\\ProgettoMalnati-correct\\Progetto\\bin\\Debug\\Progetto.exe");
-
+            // Read the Path exe and send
+            var process = Process.GetCurrentProcess(); 
+            string fullPath = process.MainModule.FileName;
+            //setting.SetKeyRegedit("C:\\Users\\lucio\\Documents\\ProgettoMalnati\\ProgettoMalnati-correct\\Progetto\\bin\\Debug\\Progetto.exe");
+            setting.SetKeyRegedit(fullPath);
             this.Visible = false;
         }
 

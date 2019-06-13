@@ -15,7 +15,6 @@ namespace Progetto
         private IPEndPoint remoteEndPoint;      //Ip e porta per inviare la presentazione
         private IPEndPoint anyEndPoint;         //Ip e porta per ricevere la presentazione
 
-
         public UDPClass()
         {
             ipMulticast = IPAddress.Parse("224.000.2.0");
@@ -29,11 +28,12 @@ namespace Progetto
             client.JoinMulticastGroup(ipMulticast);
         }
 
-        public void MulticastSubscription2()
+       /* NO
+        * public void MulticastSubscription2()
         {
             client = new UdpClient(1501);    // porta del multicast per poter ricevere
             client.JoinMulticastGroup(ipMulticast);
-        }
+        }*/
 
 
         // Crea un UDPClient associato a una porta libera e ritorna la porta usata
@@ -56,6 +56,7 @@ namespace Progetto
         {
             Byte[] data = Encoding.ASCII.GetBytes(s);
             client.Send(data, data.Length, dest);
+            Console.Write("INVIO RICHIESTA FILE " + dest.Address + " " + dest.Port);
         }
 
         // Riceve un messaggio dal mittente
