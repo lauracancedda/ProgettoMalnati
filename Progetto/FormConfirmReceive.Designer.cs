@@ -49,7 +49,7 @@
             // 
             this.Accept.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Accept.Location = new System.Drawing.Point(76, 88);
-            this.Accept.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Accept.Margin = new System.Windows.Forms.Padding(2);
             this.Accept.Name = "Accept";
             this.Accept.Size = new System.Drawing.Size(71, 28);
             this.Accept.TabIndex = 2;
@@ -61,7 +61,7 @@
             // 
             this.Refuse.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Refuse.Location = new System.Drawing.Point(275, 88);
-            this.Refuse.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Refuse.Margin = new System.Windows.Forms.Padding(2);
             this.Refuse.Name = "Refuse";
             this.Refuse.Size = new System.Drawing.Size(71, 28);
             this.Refuse.TabIndex = 3;
@@ -77,9 +77,9 @@
             this.Controls.Add(this.Refuse);
             this.Controls.Add(this.Accept);
             this.Controls.Add(this.RequestText);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "FormConfirmReceive";
-            this.Text = "Ricezione file";
+            this.Text = "Ricezione File";
             this.Load += new System.EventHandler(this.FormConfirmReceive_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

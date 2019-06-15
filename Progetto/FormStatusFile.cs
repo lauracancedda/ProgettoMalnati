@@ -12,24 +12,13 @@ namespace Progetto
 {
     public partial class FormStatusFile : Form
     {
-        private bool status = true;
-
-        private int dimfile;
-        public FormStatusFile(int statusFile, int dimension)
+        private bool sendCanceled = false;
+        private int dimFile;
+        public FormStatusFile(int progress, int dimension)
         {
             InitializeComponent();
-            progressBar1.Value = statusFile;
-            dimfile = dimension;
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void progressBar1_Click(object sender, EventArgs e)
-        {
+            progressBar.Value = progress;
+            dimFile = dimension;
 
         }
 
@@ -37,26 +26,24 @@ namespace Progetto
         {
         }
 
-        public int ChangeStatus(int sizefilesend)
+        public void updateProgress(int sizeFileSent)
         {
             //Normalize better this value LUCIO! 
-            progressBar1.Value = (progressBar1.Maximum * sizefilesend) / dimfile;
-            if (status == false)
-            {
-                //Send Cancel
-                MessageBox.Show("Invio Cancel!");
-                //this.Close();
-                return -1;
-            }
-            return 0;
+            progressBar.Value = (progressBar.Maximum * sizeFileSent) / dimFile;
         }
 
 
 
-        private void button1_Click_1(object sender, EventArgs e)
+        private void cancel_Click(object sender, EventArgs e)
         {
-            status = false;
+            sendCanceled = true;
+            MessageBox.Show("Invio annullato!");
             this.Close();
+        }
+
+        public bool isSendingCanceled()
+        {
+            return sendCanceled;
         }
     }
 }

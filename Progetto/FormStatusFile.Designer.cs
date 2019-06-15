@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
             this.Cancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -38,41 +38,44 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(24, 23);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(62, 13);
+            this.label1.Size = new System.Drawing.Size(79, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Status File: ";
+            this.label1.Text = "Invio in corso...";
             // 
-            // progressBar1
+            // progressBar
             // 
-            this.progressBar1.Location = new System.Drawing.Point(27, 39);
-            this.progressBar1.Maximum = 1000;
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(233, 26);
-            this.progressBar1.TabIndex = 1;
-            this.progressBar1.Value = 1000;
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar.Location = new System.Drawing.Point(27, 47);
+            this.progressBar.Maximum = 1000;
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(336, 26);
+            this.progressBar.TabIndex = 1;
+            this.progressBar.Value = 1000;
             // 
             // Cancel
             // 
-            this.Cancel.Location = new System.Drawing.Point(27, 72);
+            this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Cancel.Location = new System.Drawing.Point(160, 91);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 2;
-            this.Cancel.Text = "Cancel";
+            this.Cancel.Text = "Annulla";
             this.Cancel.UseVisualStyleBackColor = true;
-            this.Cancel.Click += new System.EventHandler(this.button1_Click_1);
+            this.Cancel.Click += new System.EventHandler(this.cancel_Click);
             // 
             // FormStatusFile
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(433, 249);
+            this.ClientSize = new System.Drawing.Size(394, 145);
             this.Controls.Add(this.Cancel);
-            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.label1);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FormStatusFile";
-            this.Text = "FormStatusFile";
+            this.Text = "Invio File";
             this.Load += new System.EventHandler(this.FormStatusFile_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -82,7 +85,7 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.Button Cancel;
     }
 }

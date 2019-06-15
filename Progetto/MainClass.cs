@@ -350,8 +350,7 @@ namespace Progetto
                     tcp.CreateRequester();
                     tcp.Connect(send.Address, send.Port);
                     byte[] bytes = System.IO.File.ReadAllBytes(filename);
-                    bool t = true;
-                    tcp.SendFileBuffered(bytes, ref t);
+                    tcp.SendFileBuffered(bytes);
                     //GESTIRE CON Exception la chiusura del thred in caso l invio del file è stato annullato!
                 }
                 else

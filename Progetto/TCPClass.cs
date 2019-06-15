@@ -111,7 +111,7 @@ namespace Progetto
             return file;
         }
 
-        public void SendFileBuffered(byte[] file, ref bool flag)
+        public void SendFileBuffered(byte[] file)
         {
             byte[] buffer = new byte[1024];
             int dim = file.Length;
@@ -125,25 +125,21 @@ namespace Progetto
             stream.Write(dimension, 0, dimension.Length);
 
             // Send File - Manage send view
-            FormStatusFile formstatusfile = new FormStatusFile(0, dim);
-            while (flag == true && left > 0)
+            FormStatusFile formStatusFile = new FormStatusFile(0, dim);
+            while (formStatusFile.isSendingCanceled() == false && left > 0)
             {
                 Array.ConstrainedCopy(file, offset, buffer, 0, 1024);
                 stream.Write(buffer, 0, buffer.Length);
                 stream.Flush();
                 offset = offset + 1024;
                 left = left - 1024;
-                if (formstatusfile.ChangeStatus(offset) == -1)
-                {
-                    //Cancel Send File
-                    flag = false;
-                }
+                formStatusFile.updateProgress(offset);
             }
 
-            // Check if the file is upload
-            if (offset < dim)
+            // Check if the file was sent correctly
+            if (offset < dim && formStatusFile.isSendingCanceled() == false)
                 throw new Exception("Invio interrotto");
-            return;/**/
+            return;
         }
 
 
