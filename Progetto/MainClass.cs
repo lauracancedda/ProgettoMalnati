@@ -32,8 +32,11 @@ namespace Progetto
         private Thread manageMap;
         private Thread sendImageUnicast;
         private Thread receiveUnicast;
+        private Thread shareForm;
         private List<Value> userToSendFile;
-        public MainClass(Settings s)
+        private string pathsendfile = "";
+
+        public MainClass(ref Settings s)
         {
             setting = s;
             mutex_map = new Mutex();
@@ -69,11 +72,18 @@ namespace Progetto
             receiveMulticast = new Thread(ReceivePresentations);
             manageMap = new Thread(CheckMap);
 
+            //
+            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
+
+            shareForm = new Thread(showFormSharing);
+
             sendImageUnicast.Start(imageSender);
             receiveUnicast.Start(connectionReceiver);
             sendMulticast.Start(ports);
             receiveMulticast.Start();
             manageMap.Start();
+
+            shareForm.Start();
         }
 
 
@@ -82,15 +92,17 @@ namespace Progetto
         {
             while (true)
             {
-                mutex_map.WaitOne();
+
                 foreach (KeyValuePair<IPAddress, Value> entry in usersMap)
                 {
                     if ((DateTime.Now.Millisecond - entry.Value.time.Millisecond) > 5000)
                     {
+                        mutex_map.WaitOne();
                         usersMap.Remove(entry.Key);
+                        mutex_map.ReleaseMutex();
                     }
                 }
-                mutex_map.ReleaseMutex();
+
                 Thread.Sleep(4000);
             }
 
@@ -111,12 +123,14 @@ namespace Progetto
                 //Utente non presente
                 v.name = val.name;
                 v.time = val.time;
-                v.photo = null;
+
                 v.ip = ip;
                 v.portImage = val.portImage;
                 v.portRequest = val.portRequest;
 
                 //richiedo la foto
+
+
                 TCPClass tcpclass = new TCPClass();
                 tcpclass.CreateRequester();
                 tcpclass.Connect(ip, val.portImage);
@@ -128,7 +142,12 @@ namespace Progetto
                 {
                     // foto presente
                     MemoryStream ms = new MemoryStream(tcpclass.ReceiveFile());
-                    val.photo = Image.FromStream(ms);
+                    v.photo = Image.FromStream(ms);
+                    v.photo.Save(v.ip.ToString() + "_" + v.name);
+                }
+                else
+                {
+                    v.photo = null;
                 }
 
                 //aggiungo il nuovo utente
@@ -141,13 +160,17 @@ namespace Progetto
         {
             UDPClass udp = new UDPClass();
             udp.MulticastSubscription();
-            //Accettare i nuovi utenti ed eventualmente aggiornare la Mappa
+            //Accettare i nuovi utenti (scartando se stesso) ed eventualmente aggiornare la Mappa
             while (true)
             {
                 Value v = udp.ReceiveWrapPacket();
-                mutex_map.WaitOne();
-                MapRefresh(v.ip, v);
-                mutex_map.ReleaseMutex();
+                if (v.name != setting.Name)
+                {
+                    mutex_map.WaitOne();
+                    MapRefresh(v.ip, v);
+                    mutex_map.ReleaseMutex();
+                }
+
             }
         }
 
@@ -174,12 +197,15 @@ namespace Progetto
             while (true)
             {
                 setting.publicMode.WaitOne();
+                // Listener fatto nel creator
+
                 tcpImageSender.AcceptConnection();
-                tcpImageSender.ReceiveMessage(14);
+                string messrec = tcpImageSender.ReceiveMessage(14);
                 if (setting.PhotoSelected == true)
                 {
                     tcpImageSender.SendMessage("ok");
                     MemoryStream ms = new MemoryStream();
+                    //controllare se setting.Photo va appunto a lavorare con la foto giusta, ossia il path o il tipo image correct
                     setting.Photo.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
                     tcpImageSender.SendFile(ms.ToArray());
                 }
@@ -222,6 +248,12 @@ namespace Progetto
                         udpConnectionsReceiver.SendPacket("NO", remote);
                         continue;
                     }
+                    else
+                    {
+                        // INVIARE LA PORTA SU CUI DEVE INVIARE IL FILE
+                        //Idea inviare in un messaggio la porta e qui mettersi in attesa su un listener su l ip che sai (il tuo) e la porta che invi like message
+                        // sta sotto else a questa condizione
+                    }
                 }
 
                 // ricezione automatica o accettata; riceve nome e tipo file
@@ -262,7 +294,7 @@ namespace Progetto
 
                 //crea tcp receiver e invia la porta scelta con udp
                 TCPClass tcpReceiver = new TCPClass();
-                int tcpPort = tcpReceiver.CreateListener(IPAddress.Any, 0);
+                int tcpPort = tcpReceiver.CreateListener(IPAddress.Any, 0); // L IP dovrebbe esserre quello che gia hai, hai bisogno solo i sapere la porta libera e inviarla
                 udpConnectionsReceiver.SendPacket(tcpPort.ToString(), remote);
 
                 //sgancia thread ricezione tcp
@@ -272,16 +304,24 @@ namespace Progetto
 
         public void showFormSharing()
         {
-            string pathbefore = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
-            while (string.Compare(pathbefore, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) == 0)
+            //Rivedere questo loop!
+
+            while (true)
             {
-                Thread.Sleep(1);
+
+
+                if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
+                {
+                    pathsendfile = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
+                    //MessageBox.Show(pathnew);
+                    System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
+                    FormSharing share = new FormSharing(usersMap, pathsendfile, setting);
+                    Application.Run(share);
+
+                }
+                Thread.Sleep(2000);
             }
-            string pathnew = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
-            //MessageBox.Show(pathnew);
-            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
-            FormSharing share = new FormSharing(usersMap, pathnew, setting);
-            Application.Run(share);
+
 
         }
 
@@ -295,11 +335,14 @@ namespace Progetto
             {
                 Value user = userToSendFile.LastOrDefault();
                 UDPClass udp = new UDPClass();
-                udp.MulticastSubscription();
+                udpConnectionsSender.MulticastSubscription();
+
+                //udpConnectionsSender.MulticastSubscription2();
 
                 IPEndPoint send = new IPEndPoint(user.ip, udp.Bind());
                 udpConnectionsSender.SendPacket("SEND FILE", send);
-                string receiveaccess = udpConnectionsSender.ReceivePacket(send);
+                //string receiveaccess = udpConnectionsSender.ReceivePacket(send);
+                string receiveaccess = udp.ReceivePacket(send);
                 if (string.Compare(receiveaccess, "YES") == 0)
                 {
                     //Invio del file
@@ -323,6 +366,7 @@ namespace Progetto
 
         public void SendFile(Dictionary<IPAddress, Value> UserToSend, string filename)
         {
+            //STA ROBA NON VA BENE
             userToSendFile = new List<Value>();
 
             foreach (KeyValuePair<IPAddress, Value> entry in UserToSend)

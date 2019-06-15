@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace Progetto
 {
@@ -48,7 +49,7 @@ namespace Progetto
             else
                 Save.Enabled = false;
 
-           file_modified = true;
+            file_modified = true;
         }
 
         private void Browse_Click(object sender, EventArgs e)
@@ -65,7 +66,7 @@ namespace Progetto
 
         private void ChooseFolder_Click(object sender, EventArgs e)
         {
-            if(Folder.ShowDialog() == DialogResult.OK)
+            if (Folder.ShowDialog() == DialogResult.OK)
             {
                 Path.Text = Folder.SelectedPath;
                 file_modified = true;
@@ -121,10 +122,16 @@ namespace Progetto
             // lancia il thread principale
             if (t == null)
             {
-                main = new MainClass(setting);
+                main = new MainClass(ref setting);
                 t = new Thread(main.Start);
                 t.Start();
             }
+
+            // Read the Path exe and send
+            var process = Process.GetCurrentProcess();
+            string fullPath = process.MainModule.FileName;
+            //setting.SetKeyRegedit("C:\\Users\\lucio\\Documents\\ProgettoMalnati\\ProgettoMalnati-correct\\Progetto\\bin\\Debug\\Progetto.exe");
+            setting.SetKeyRegedit(fullPath);
             this.Visible = false;
         }
 
@@ -162,7 +169,7 @@ namespace Progetto
                 setting.mutex_setting.ReleaseMutex();
                 photo_modified = true;
             }
-            
+
         }
 
         public void SaveOnFile()
@@ -188,7 +195,7 @@ namespace Progetto
 
             // salva l'immagine
             if (photo_modified == true)
-                Photo.Image.Save("immagine.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                Photo.Image.Save("immagine01.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
         }
 
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
