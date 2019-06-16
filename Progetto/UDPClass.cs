@@ -28,14 +28,6 @@ namespace Progetto
             client.JoinMulticastGroup(ipMulticast);
         }
 
-        /* NO
-         * public void MulticastSubscription2()
-         {
-             client = new UdpClient(1501);    // porta del multicast per poter ricevere
-             client.JoinMulticastGroup(ipMulticast);
-         }*/
-
-
         // Crea un UDPClient associato a una porta libera e ritorna la porta usata
         public int Bind()
         {
@@ -56,7 +48,6 @@ namespace Progetto
         {
             Byte[] data = Encoding.ASCII.GetBytes(s);
             client.Send(data, data.Length, dest);
-            Console.Write("INVIO RICHIESTA FILE " + dest.Address + " " + dest.Port);
         }
 
         // Riceve un messaggio dal mittente
@@ -102,6 +93,13 @@ namespace Progetto
             }
             else
                 return null;
+        }
+
+        public void SendConnectionRequest(IPEndPoint dest)
+        {
+            string s = "Richiesta Invio";
+            SendPacket(s, dest);
+            return;
         }
     }
 }

@@ -90,29 +90,30 @@ namespace Progetto
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
             stream.Write(file, 0, file.Length);
-            stream.Flush();
             return;
         }
 
         public byte[] ReceiveFile()
         {
-            //Understand why the tcp connection fail 
             byte[] receivedDim = new byte[8];
             stream.Read(receivedDim, 0, receivedDim.Length);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(receivedDim);
-            Console.WriteLine("dimensione ricevuta: {0}", BitConverter.ToInt64(receivedDim, 0));
+            Int64 dimension = BitConverter.ToInt64(receivedDim, 0);
+            Console.WriteLine("dimensione ricevuta: {0}", dimension);
 
-            byte[] file = new byte[BitConverter.ToInt64(receivedDim, 0)];
-            stream.Read(file, 0, file.Length);
+            byte[] file = new byte[dimension];
+            int read = stream.Read(file, 0, file.Length);
             //File.WriteAllBytes("newFile.jpg", file);
-            Console.WriteLine("file ricevuto");
+            Console.WriteLine("file ricevuto, dimensione {0}", read);
 
             return file;
         }
 
-        public void SendFileBuffered(byte[] file)
+        public void SendFileBuffered(object f)
         {
+            string filePath = (string) f;
+            byte[] file = File.ReadAllBytes(filePath);
             byte[] buffer = new byte[1024];
             int dim = file.Length;
             int left = file.Length;
@@ -145,7 +146,7 @@ namespace Progetto
 
         public void ReceiveFileBuffered(object f)
         {
-            string filename = (string)f;
+            string filePath = (string) f;
             byte[] buffer = new byte[1024];
             byte[] receivedDim = new byte[8];
             byte[] file;
@@ -178,7 +179,7 @@ namespace Progetto
                 throw new Exception("Invio interrotto");
             else
             {
-                File.WriteAllBytes(filename, file);
+                File.WriteAllBytes(filePath, file);
                 Console.WriteLine("file ricevuto");
             }
 

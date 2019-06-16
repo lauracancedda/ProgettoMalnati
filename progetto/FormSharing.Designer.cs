@@ -28,30 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.OnlineUser = new System.Windows.Forms.Button();
-            this.ButtonSendFile = new System.Windows.Forms.Button();
+            this.Send = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
-            // OnlineUser
+            // Send
             // 
-            this.OnlineUser.Location = new System.Drawing.Point(24, 233);
-            this.OnlineUser.Name = "OnlineUser";
-            this.OnlineUser.Size = new System.Drawing.Size(75, 23);
-            this.OnlineUser.TabIndex = 1;
-            this.OnlineUser.Text = "Users Online";
-            this.OnlineUser.UseVisualStyleBackColor = true;
-            this.OnlineUser.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // ButtonSendFile
-            // 
-            this.ButtonSendFile.Location = new System.Drawing.Point(27, 281);
-            this.ButtonSendFile.Name = "ButtonSendFile";
-            this.ButtonSendFile.Size = new System.Drawing.Size(75, 23);
-            this.ButtonSendFile.TabIndex = 2;
-            this.ButtonSendFile.Text = "Send File";
-            this.ButtonSendFile.UseVisualStyleBackColor = true;
-            this.ButtonSendFile.Click += new System.EventHandler(this.button2_Click);
+            this.Send.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Send.Location = new System.Drawing.Point(175, 0);
+            this.Send.Name = "Send";
+            this.Send.Size = new System.Drawing.Size(75, 23);
+            this.Send.TabIndex = 2;
+            this.Send.Text = "Invia";
+            this.Send.UseVisualStyleBackColor = true;
+            this.Send.Click += new System.EventHandler(this.Send_Click);
             // 
             // openFileDialog1
             // 
@@ -62,8 +53,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(419, 450);
-            this.Controls.Add(this.ButtonSendFile);
-            this.Controls.Add(this.OnlineUser);
+            this.Controls.Add(this.Send);
             this.Name = "FormSharing";
             this.Text = " ";
             this.Load += new System.EventHandler(this.FormSharing_Load);
@@ -72,8 +62,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.Button OnlineUser;
-        private System.Windows.Forms.Button ButtonSendFile;
+        private System.Windows.Forms.Button Send;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }

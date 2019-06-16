@@ -27,20 +27,20 @@ namespace Progetto
         private Settings setting;
         private Dictionary<IPAddress, Value> usersMap;
         private Mutex mutex_map;
+        public static AutoResetEvent pathChanged;
         private Thread sendMulticast;
         private Thread receiveMulticast;
         private Thread manageMap;
         private Thread sendImageUnicast;
         private Thread receiveUnicast;
         private Thread shareForm;
-        private List<Value> userToSendFile;
-        private string pathsendfile = "";
 
         public MainClass(ref Settings s)
         {
             setting = s;
             mutex_map = new Mutex();
             usersMap = new Dictionary<IPAddress, Value>();
+            pathChanged = new AutoResetEvent(false);
         }
 
         ~MainClass()
@@ -50,6 +50,7 @@ namespace Progetto
             manageMap.Join();
             sendImageUnicast.Join();
             receiveUnicast.Join();
+            shareForm.Join();
         }
 
         // thread principale, lancia 5 thread statici
@@ -66,23 +67,21 @@ namespace Progetto
             // porte utilizzate da comunicare in SendPresentation
             string ports = imagePort + "_" + requestPort;
 
+            // set variabile d'ambiente
+            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
+
             sendImageUnicast = new Thread(ProvidePhoto);
             receiveUnicast = new Thread(ReceiveConnections);
             sendMulticast = new Thread(SendPresentation);
             receiveMulticast = new Thread(ReceivePresentations);
             manageMap = new Thread(CheckMap);
-
-            //
-            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
-
-            shareForm = new Thread(showFormSharing);
+            shareForm = new Thread(ShowFormSharing);
 
             sendImageUnicast.Start(imageSender);
             receiveUnicast.Start(connectionReceiver);
             sendMulticast.Start(ports);
             receiveMulticast.Start();
             manageMap.Start();
-
             shareForm.Start();
         }
 
@@ -92,7 +91,6 @@ namespace Progetto
         {
             while (true)
             {
-
                 foreach (KeyValuePair<IPAddress, Value> entry in usersMap)
                 {
                     if ((DateTime.Now.Millisecond - entry.Value.time.Millisecond) > 5000)
@@ -102,10 +100,8 @@ namespace Progetto
                         mutex_map.ReleaseMutex();
                     }
                 }
-
                 Thread.Sleep(4000);
             }
-
         }
         public void MapRefresh(IPAddress ip, Value val)
         {
@@ -129,12 +125,9 @@ namespace Progetto
                 v.portRequest = val.portRequest;
 
                 //richiedo la foto
-
-
                 TCPClass tcpclass = new TCPClass();
                 tcpclass.CreateRequester();
                 tcpclass.Connect(ip, val.portImage);
-
                 tcpclass.SendMessage("Richiesta Foto");
 
                 string response = tcpclass.ReceiveMessage(2);
@@ -170,7 +163,6 @@ namespace Progetto
                     MapRefresh(v.ip, v);
                     mutex_map.ReleaseMutex();
                 }
-
             }
         }
 
@@ -197,16 +189,14 @@ namespace Progetto
             while (true)
             {
                 setting.publicMode.WaitOne();
-                // Listener fatto nel creator
 
                 tcpImageSender.AcceptConnection();
-                string messrec = tcpImageSender.ReceiveMessage(14);
+                string request = tcpImageSender.ReceiveMessage(14);
                 if (setting.PhotoSelected == true)
                 {
                     tcpImageSender.SendMessage("ok");
                     MemoryStream ms = new MemoryStream();
-                    //controllare se setting.Photo va appunto a lavorare con la foto giusta, ossia il path o il tipo image correct
-                    setting.Photo.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    setting.Photo.Save(ms, setting.Photo.RawFormat);//System.Drawing.Imaging.ImageFormat.Jpeg); 
                     tcpImageSender.SendFile(ms.ToArray());
                 }
                 else
@@ -243,16 +233,11 @@ namespace Progetto
                 {
                     FormConfirmReceive form1 = new FormConfirmReceive(reqName);
                     form1.Show();
+                    // controllare se si ferma o accede alla scelta troppo presto
                     if (form1.GetChoice() == false)
                     {
                         udpConnectionsReceiver.SendPacket("NO", remote);
                         continue;
-                    }
-                    else
-                    {
-                        // INVIARE LA PORTA SU CUI DEVE INVIARE IL FILE
-                        //Idea inviare in un messaggio la porta e qui mettersi in attesa su un listener su l ip che sai (il tuo) e la porta che invi like message
-                        // sta sotto else a questa condizione
                     }
                 }
 
@@ -264,7 +249,9 @@ namespace Progetto
                 if (setting.DefaultSelected == false)
                 {
                     FormSelectPath form2 = new FormSelectPath(filename);
+                    form2.Show();
                     path = form2.GetPath();
+                    form2.Dispose();
                 }
                 else
                 {
@@ -294,86 +281,69 @@ namespace Progetto
 
                 //crea tcp receiver e invia la porta scelta con udp
                 TCPClass tcpReceiver = new TCPClass();
-                int tcpPort = tcpReceiver.CreateListener(IPAddress.Any, 0); // L IP dovrebbe esserre quello che gia hai, hai bisogno solo i sapere la porta libera e inviarla
+                int tcpPort = tcpReceiver.CreateListener(IPAddress.Any, 0);
                 udpConnectionsReceiver.SendPacket(tcpPort.ToString(), remote);
 
                 //sgancia thread ricezione tcp
-                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, filename);
+                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, modifiedPath);
             }
         }
 
-        public void showFormSharing()
+
+        // invia le richieste di connessione e lancia un thread per ogni destinatario
+        public void SendConnection(object users)
         {
-            //Rivedere questo loop!
+            //if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
+            String path = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
+            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
+            String filename = path.Substring(path.LastIndexOf('/'));
+            FileAttributes attributes = File.GetAttributes(path);
+            List< Value> usersSelected = (List< Value>) users;
 
-            while (true)
+            UDPClass udpClient = new UDPClass();
+            udpClient.Bind();
+
+            foreach (Value user in usersSelected)
             {
-
-
-                if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
+                //invio filename e tipo
+                IPEndPoint udpEndPoint = new IPEndPoint(user.ip, user.portRequest);
+                udpClient.SendConnectionRequest(udpEndPoint);
+                string answer = udpClient.ReceivePacket(udpEndPoint);
+                if (answer == "YES")
                 {
-                    pathsendfile = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
-                    //MessageBox.Show(pathnew);
-                    System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
-                    FormSharing share = new FormSharing(usersMap, pathsendfile, setting);
-                    Application.Run(share);
+                    udpClient.SendPacket(filename, udpEndPoint);
+                    if(attributes.HasFlag(FileAttributes.Directory))
+                        udpClient.SendPacket("Directory", udpEndPoint);
+                    else
+                        udpClient.SendPacket("File", udpEndPoint);
 
-                }
-                Thread.Sleep(2000);
-            }
+                    // ricezione porta TCP da usare per inviare il file
+                    string tcpPort = udpClient.ReceivePacket(udpEndPoint);
 
-
-        }
-
-        public void SendConnection(object sender)
-        {
-            //Send to each userselected the pathfile
-            string filename = (string)sender;
-            UDPClass udpConnectionsSender = new UDPClass();
-
-            while (true)
-            {
-                Value user = userToSendFile.LastOrDefault();
-                UDPClass udp = new UDPClass();
-                udpConnectionsSender.MulticastSubscription();
-
-                //udpConnectionsSender.MulticastSubscription2();
-
-                IPEndPoint send = new IPEndPoint(user.ip, udp.Bind());
-                udpConnectionsSender.SendPacket("SEND FILE", send);
-                //string receiveaccess = udpConnectionsSender.ReceivePacket(send);
-                string receiveaccess = udp.ReceivePacket(send);
-                if (string.Compare(receiveaccess, "YES") == 0)
-                {
                     //Invio del file
-                    TCPClass tcp = new TCPClass();
-                    tcp.CreateRequester();
-                    tcp.Connect(send.Address, send.Port);
-                    byte[] bytes = System.IO.File.ReadAllBytes(filename);
-                    tcp.SendFileBuffered(bytes);
-                    //GESTIRE CON Exception la chiusura del thred in caso l invio del file è stato annullato!
+                    TCPClass tcpSender = new TCPClass();
+                    tcpSender.CreateRequester();
+                    tcpSender.Connect(user.ip, Int32.Parse(tcpPort));
+
+                    //sgancia thread invio tcp
+                    ThreadPool.QueueUserWorkItem(tcpSender.SendFileBuffered, path);
                 }
                 else
                 {
                     //Invio rifiutato
-                    MessageBox.Show("User has rejected the File!");
-                    continue;
+                    MessageBox.Show("Invio non riuscito: l'utente ha rifiutato la ricezione");
                 }
-
             }
         }
 
-        public void SendFile(Dictionary<IPAddress, Value> UserToSend, string filename)
+        public void ShowFormSharing()
         {
-            //STA ROBA NON VA BENE
-            userToSendFile = new List<Value>();
-
-            foreach (KeyValuePair<IPAddress, Value> entry in UserToSend)
+            while (true)
             {
-                //mutex
-                userToSendFile.Add(entry.Value);
-                ThreadPool.QueueUserWorkItem(this.SendConnection, filename);
-
+                pathChanged.WaitOne();                
+                FormSharing formSharing = new FormSharing(usersMap, setting);
+                formSharing.ShowDialog(); // controllare corsa critica per show e get dei valori
+                ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());
             }
         }
     }
