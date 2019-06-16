@@ -18,6 +18,8 @@ namespace Progetto
         private Byte[] request;
         private TcpClient connectedClient;
         private NetworkStream stream;
+        private const int BUFFER_SIZE = 1024;
+
 
         public TCPClass()
         {
@@ -114,7 +116,7 @@ namespace Progetto
         {
             string filePath = (string) f;
             byte[] file = File.ReadAllBytes(filePath);
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[BUFFER_SIZE];
             int dim = file.Length;
             int left = file.Length;
             int offset = 0;
@@ -129,11 +131,19 @@ namespace Progetto
             FormStatusFile formStatusFile = new FormStatusFile(0, dim);
             while (formStatusFile.isSendingCanceled() == false && left > 0)
             {
-                Array.ConstrainedCopy(file, offset, buffer, 0, 1024);
-                stream.Write(buffer, 0, buffer.Length);
+                if (left >= BUFFER_SIZE)
+                {
+                    Array.ConstrainedCopy(file, offset, buffer, 0, BUFFER_SIZE);
+                    stream.Write(buffer, 0, BUFFER_SIZE);
+                }
+                else
+                {
+                    Array.ConstrainedCopy(file, offset, buffer, 0, left);
+                    stream.Write(buffer, 0, left);
+                }
                 stream.Flush();
-                offset = offset + 1024;
-                left = left - 1024;
+                offset = offset + BUFFER_SIZE;
+                left = left - BUFFER_SIZE;
                 formStatusFile.updateProgress(offset);
             }
 
@@ -147,7 +157,7 @@ namespace Progetto
         public void ReceiveFileBuffered(object f)
         {
             string filePath = (string) f;
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[BUFFER_SIZE];
             byte[] receivedDim = new byte[8];
             byte[] file;
             Int64 dim;

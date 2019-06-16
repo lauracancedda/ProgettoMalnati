@@ -232,8 +232,7 @@ namespace Progetto
                 if (setting.AutomaticReceive == false)
                 {
                     FormConfirmReceive form1 = new FormConfirmReceive(reqName);
-                    form1.Show();
-                    // controllare se si ferma o accede alla scelta troppo presto
+                    form1.ShowDialog();
                     if (form1.GetChoice() == false)
                     {
                         udpConnectionsReceiver.SendPacket("NO", remote);
@@ -261,10 +260,12 @@ namespace Progetto
                 //verifica unicità path ed eventualmente lo modifica
                 path = path + "/" + filename;
                 int count = 0;
+                string format = path.Substring(path.LastIndexOf('.'));
+                path = path.TrimEnd(format.ToCharArray());
                 string modifiedPath = path;
                 if (type == "File")
                 {
-                    while (File.Exists(modifiedPath) == true)
+                    while (File.Exists(modifiedPath + format) == true)
                     {
                         modifiedPath = path + "(" + count + ")";
                         count++;
@@ -272,12 +273,13 @@ namespace Progetto
                 }
                 else
                 {
-                    while (Directory.Exists(modifiedPath) == true)
+                    while (Directory.Exists(modifiedPath + format) == true)
                     {
                         modifiedPath = path + "(" + count + ")";
                         count++;
                     }
                 }
+                modifiedPath = modifiedPath + format;
 
                 //crea tcp receiver e invia la porta scelta con udp
                 TCPClass tcpReceiver = new TCPClass();
