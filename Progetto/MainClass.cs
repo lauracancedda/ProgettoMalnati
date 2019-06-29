@@ -145,6 +145,7 @@ namespace Progetto
 
                 //aggiungo il nuovo utente
                 usersMap.Add(ip, v);
+                Console.WriteLine("Aggiunto alla mappa l'utente: {0}", v.name);
             }
         }
 
@@ -355,7 +356,7 @@ namespace Progetto
                 {
                     pathsendfile = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
                     System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
-                    FormSharing formSharing = new FormSharing(usersMap, setting);
+                    FormSharing formSharing = new FormSharing(ref usersMap, setting);
                     formSharing.ShowDialog();
                     if(formSharing.getSelectedUsers().Count > 0)
                         ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());

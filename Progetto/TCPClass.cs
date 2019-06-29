@@ -85,30 +85,72 @@ namespace Progetto
 
         public void SendFile(byte[] file)
         {
-            //Understand why the tcp connection fail 
-            Int64 dim = file.Length;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            Int32 dim = file.Length;
+            int left = file.Length;
+            int offset = 0;
+
+            //send size
             byte[] dimension = BitConverter.GetBytes(dim);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
-            stream.Write(file, 0, file.Length);
+            Console.WriteLine("dimensione inviata su {0} byte: {1}",dimension.Length, dim);
+
+            // Send File - Manage send view
+            while (left > 0)
+            {
+                if (left >= BUFFER_SIZE)
+                {
+                    Array.ConstrainedCopy(file, offset, buffer, 0, BUFFER_SIZE);
+                    stream.Write(buffer, 0, BUFFER_SIZE);
+                }
+                else
+                {
+                    Array.ConstrainedCopy(file, offset, buffer, 0, left);
+                    stream.Write(buffer, 0, left);
+                }
+                stream.Flush();
+                offset = offset + BUFFER_SIZE;
+                left = left - BUFFER_SIZE;
+            }
+
+            // Check if the file was sent correctly
+            if (offset < dim)
+                throw new Exception("Invio interrotto");
             return;
         }
 
         public byte[] ReceiveFile()
         {
-            byte[] receivedDim = new byte[8];
+            byte[] buffer = new byte[BUFFER_SIZE];
+            byte[] receivedDim = new byte[4];
+            byte[] file;
+            int received = 0;
+            int nRead;
+
+            // ricezione dimensione
             stream.Read(receivedDim, 0, receivedDim.Length);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(receivedDim);
-            Int64 dimension = BitConverter.ToInt64(receivedDim, 0);
-            Console.WriteLine("dimensione ricevuta: {0}", dimension);
+            Int32 dim = BitConverter.ToInt32(receivedDim, 0);
+            Console.WriteLine("dimensione ricevuta: {0}", dim);
 
-            byte[] file = new byte[dimension];
-            int read = stream.Read(file, 0, file.Length);
-            //File.WriteAllBytes("newFile.jpg", file);
-            Console.WriteLine("file ricevuto, dimensione {0}", read);
+            // ricezione file
+            file = new byte[dim];
+            stream.ReadTimeout = 10000;
+            while (received < dim)
+            {
+                nRead = stream.Read(buffer, 0, buffer.Length);
+                Array.ConstrainedCopy(buffer, 0, file, received, nRead);
+                received = received + nRead;
+            }
 
+            // controllo se tutto il file è stato inviato
+            if (received < dim)
+                throw new Exception("Invio interrotto");
+
+            Console.WriteLine("file ricevuto, dimensione {0}", received);
             return file;
         }
 

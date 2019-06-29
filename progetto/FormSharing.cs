@@ -26,7 +26,7 @@ namespace Progetto
         private List<Value> selectedUsers;
         private List<Card> displayedUsers;
         
-        public FormSharing(Dictionary<IPAddress, Value> onlineUsers, Settings setting)
+        public FormSharing(ref Dictionary<IPAddress, Value> onlineUsers, Settings setting)
         {
             InitializeComponent();
             displayedUsers = new List<Card>();
