@@ -27,20 +27,20 @@ namespace Progetto
         private Settings setting;
         private Dictionary<IPAddress, Value> usersMap;
         private Mutex mutex_map;
-        public static AutoResetEvent pathChanged;
+        //public static AutoResetEvent pathChanged;
         private Thread sendMulticast;
         private Thread receiveMulticast;
         private Thread manageMap;
         private Thread sendImageUnicast;
         private Thread receiveUnicast;
         private Thread shareForm;
-
+        private string pathsendfile;
         public MainClass(ref Settings s)
         {
             setting = s;
             mutex_map = new Mutex();
             usersMap = new Dictionary<IPAddress, Value>();
-            pathChanged = new AutoResetEvent(false);
+            //pathChanged = new AutoResetEvent(false);
         }
 
         ~MainClass()
@@ -340,13 +340,29 @@ namespace Progetto
 
         public void ShowFormSharing()
         {
-            while (true)
+            /*while (true)
             {
                 pathChanged.WaitOne();                
                 FormSharing formSharing = new FormSharing(usersMap, setting);
                 formSharing.ShowDialog(); // controllare corsa critica per show e get dei valori
                 ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());
+            }*/
+
+            while (true)
+            {
+
+                if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
+                {
+                    pathsendfile = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
+                    System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
+                    FormSharing formSharing = new FormSharing(usersMap, setting);
+                    formSharing.ShowDialog();
+                    if(formSharing.getSelectedUsers().Count > 0)
+                        ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());
+                }
+                Thread.Sleep(2000);
             }
+
         }
     }
 }

@@ -70,12 +70,12 @@ namespace Progetto
             try
             {
                 //File
-                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\*\shell\SendFileMalnati", "Icon", null) == null)
+                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\*\shell\Progetto", "Icon", null) == null)
                 {
                     Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("*", true).
-                    OpenSubKey("shell", true).CreateSubKey("SendFileMalnati").SetValue("Icon", "\"" + pathexecutable + "\"");
+                    OpenSubKey("shell", true).CreateSubKey("Condividi con gli utenti online").SetValue("Icon", "\"" + pathexecutable + "\"");
                     Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("*", true).
-                        OpenSubKey("shell", true).OpenSubKey("SendFileMalnati", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
+                        OpenSubKey("shell", true).OpenSubKey("Condividi con gli utenti online", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
 
                 }
             }
@@ -86,12 +86,12 @@ namespace Progetto
             //Directory
             try
             {
-                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Directory\shell\SendFileMalnati", "Icon", null) == null)
+                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Directory\shell\Progetto", "Icon", null) == null)
                 {
                     Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("Directory", true).
-                    OpenSubKey("shell", true).CreateSubKey("SendFileMalnati").SetValue("Icon", "\"" + pathexecutable + "\"");
+                    OpenSubKey("shell", true).CreateSubKey("Condividi con gli utenti online").SetValue("Icon", "\"" + pathexecutable + "\"");
                     Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("Directory", true).
-                        OpenSubKey("shell", true).OpenSubKey("SendFileMalnati", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
+                        OpenSubKey("shell", true).OpenSubKey("Condividi con gli utenti online", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
 
                 }
             }

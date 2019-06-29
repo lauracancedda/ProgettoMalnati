@@ -130,7 +130,6 @@ namespace Progetto
             // Read the Path exe and send
             var process = Process.GetCurrentProcess();
             string fullPath = process.MainModule.FileName;
-            //setting.SetKeyRegedit("C:\\Users\\lucio\\Documents\\ProgettoMalnati\\ProgettoMalnati-correct\\Progetto\\bin\\Debug\\Progetto.exe");
             setting.SetKeyRegedit(fullPath);
             this.Visible = false;
         }

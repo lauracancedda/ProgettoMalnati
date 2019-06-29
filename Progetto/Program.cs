@@ -33,7 +33,7 @@ namespace Progetto
                 //FormSharing
                 string[] args = Environment.GetCommandLineArgs();
                 System.Environment.SetEnvironmentVariable("envvar", args[1], EnvironmentVariableTarget.User);
-                MainClass.pathChanged.Set();
+                //MainClass.pathChanged.Set();
                 return;
             }
 
