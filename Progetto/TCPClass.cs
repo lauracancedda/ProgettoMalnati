@@ -222,6 +222,9 @@ namespace Progetto
             while (received < dim)
             {
                 nRead = stream.Read(buffer, 0, buffer.Length);
+                // se nRead viene restituita sbagliata in caso di ultimo blocco < 1024 provare soluzione commentata
+                /*if (nRead != 1024)
+                    nRead = dim - received;*/
                 Array.Copy(buffer, 0, file, received, nRead);
                 received = received + nRead;
             }

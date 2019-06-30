@@ -7,6 +7,8 @@ using System.Threading;
 using System.Net;
 using System.Drawing;
 using System.IO;
+using System.IO.Pipes;
+using System.Text;
 
 namespace Progetto
 {
@@ -32,9 +34,29 @@ namespace Progetto
             {
                 //FormSharing
                 string[] args = Environment.GetCommandLineArgs();
-                System.Environment.SetEnvironmentVariable("envvar", args[1], EnvironmentVariableTarget.User);
-                //MainClass.pathChanged.Set();
-                return;
+                int numberOfArgs = args.Length;
+                MessageBox.Show("Sono stati selezionati " + (numberOfArgs - 1).ToString() + "file ");
+                string argsConcatenated = "";
+                foreach (string arg in args)
+                {
+                    argsConcatenated += arg + " - \n";
+                }
+                MessageBox.Show(argsConcatenated);
+                //Per adesso puo inviare un solo file (cioe il primo che si seleziona args[1]
+                using (NamedPipeServerStream namedPipeServer = new NamedPipeServerStream("pipe-project"))
+                {
+                    namedPipeServer.WaitForConnection();
+                    string path = args[1];
+                    byte[] bytes = Encoding.ASCII.GetBytes(path);
+                    // Invio la dimensione del path del file
+                    int length = bytes.Length;
+                    namedPipeServer.WriteByte(BitConverter.GetBytes(length)[0]);
+                    Thread.Sleep(100);
+                    // Invio il path del file
+                    namedPipeServer.Write(bytes, 0, bytes.Length);
+                    Console.WriteLine("Path file inviato");
+                    namedPipeServer.Close();
+                }
             }
 
         }

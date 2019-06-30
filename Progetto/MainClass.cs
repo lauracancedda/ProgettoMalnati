@@ -9,6 +9,7 @@ using System.Threading;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.IO.Pipes;
 
 namespace Progetto
 {
@@ -34,7 +35,7 @@ namespace Progetto
         private Thread sendImageUnicast;
         private Thread receiveUnicast;
         private Thread shareForm;
-        private string pathsendfile;
+        private string filePath;
         public MainClass(ref Settings s)
         {
             setting = s;
@@ -78,6 +79,8 @@ namespace Progetto
             shareForm = new Thread(ShowFormSharing);
 
             sendImageUnicast.Start(imageSender);
+            // per consentire al thread di gestire n form: i form coinvolti sono FormConfirmReceive e FormSelectPath
+            receiveUnicast.SetApartmentState(ApartmentState.STA);
             receiveUnicast.Start(connectionReceiver);
             sendMulticast.Start(ports);
             receiveMulticast.Start();
@@ -259,16 +262,19 @@ namespace Progetto
                 }
 
                 //verifica unicità path ed eventualmente lo modifica
-                path = path + "/" + filename;
-                int count = 0;
-                string format = path.Substring(path.LastIndexOf('.'));
-                path = path.TrimEnd(format.ToCharArray());
                 string modifiedPath = path;
+                path = path + "\\" + filename;
+
+                int count = 0;
+                string format = filename.Substring(filename.LastIndexOf('.'));
+
+                filename = filename.TrimEnd(format.ToCharArray());
+                string filenamefix = filename;
                 if (type == "File")
                 {
-                    while (File.Exists(modifiedPath + format) == true)
+                    while (File.Exists(modifiedPath + filename + format) == true)
                     {
-                        modifiedPath = path + "(" + count + ")";
+                        filename = filenamefix + "(" + count + ")";
                         count++;
                     }
                 }
@@ -276,11 +282,11 @@ namespace Progetto
                 {
                     while (Directory.Exists(modifiedPath + format) == true)
                     {
-                        modifiedPath = path + "(" + count + ")";
+                        modifiedPath = format + "(" + count + ")";
                         count++;
                     }
                 }
-                modifiedPath = modifiedPath + format;
+                modifiedPath = modifiedPath + filename + format;
 
                 //crea tcp receiver e invia la porta scelta con udp
                 TCPClass tcpReceiver = new TCPClass();
@@ -296,11 +302,8 @@ namespace Progetto
         // invia le richieste di connessione e lancia un thread per ogni destinatario
         public void SendConnection(object users)
         {
-            if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
-                pathsendfile = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
-            String filename = pathsendfile.Substring(pathsendfile.LastIndexOf('/'));
-            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
-            FileAttributes attributes = File.GetAttributes(pathsendfile);
+            String filename = filePath.Substring(filePath.LastIndexOf('\\'));
+            FileAttributes attributes = File.GetAttributes(filePath);
             List< Value> usersSelected = (List< Value>) users;
 
             UDPClass udpClient = new UDPClass();
@@ -329,7 +332,7 @@ namespace Progetto
                     tcpSender.Connect(user.ip, Int32.Parse(tcpPort));
 
                     //sgancia thread invio tcp
-                    ThreadPool.QueueUserWorkItem(tcpSender.SendFileBuffered, pathsendfile);
+                    ThreadPool.QueueUserWorkItem(tcpSender.SendFileBuffered, filePath);
                 }
                 else
                 {
@@ -341,27 +344,25 @@ namespace Progetto
 
         public void ShowFormSharing()
         {
-            /*while (true)
-            {
-                pathChanged.WaitOne();                
-                FormSharing formSharing = new FormSharing(usersMap, setting);
-                formSharing.ShowDialog(); // controllare corsa critica per show e get dei valori
-                ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());
-            }*/
-
             while (true)
             {
-
-                if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
+                using (NamedPipeClientStream namedPipeClient = new NamedPipeClientStream("pipe-project"))
                 {
-                    pathsendfile = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
-                    System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
+                    namedPipeClient.Connect();
+                    int pathLength;
+                    pathLength = namedPipeClient.ReadByte();
+                    Thread.Sleep(100);
+                    byte[] path = new byte[pathLength];
+                    // la lettura da pipe e' bloccante, quindi si aspetta che l'altro processo invii il path
+                    namedPipeClient.Read(path, 0, pathLength);
+                    filePath = System.Text.Encoding.UTF8.GetString(path);
                     FormSharing formSharing = new FormSharing(ref usersMap, setting);
-                    formSharing.ShowDialog();
-                    if(formSharing.getSelectedUsers().Count > 0)
+                    formSharing.ShowDialog(); // controllare corsa critica per show e get dei valori
+                    if (formSharing.getSelectedUsers().Count > 0)
                         ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());
+                    Console.WriteLine("Ricevuto tramite pipe il path " + filePath);
+                    namedPipeClient.Close();
                 }
-                Thread.Sleep(2000);
             }
 
         }

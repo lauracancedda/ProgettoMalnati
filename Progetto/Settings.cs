@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Drawing;
 using Microsoft.Win32;
+using System.Text.RegularExpressions;
+using System.IO;
 
 namespace Progetto
 {
@@ -66,40 +68,8 @@ namespace Progetto
 
         public void SetKeyRegedit(string pathexecutable)
         {
-            //Set the Path-process to the Registry. To be able to open a file or a directory
-            try
-            {
-                //File
-                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\*\shell\Progetto", "Icon", null) == null)
-                {
-                    Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("*", true).
-                    OpenSubKey("shell", true).CreateSubKey("Condividi con gli utenti online").SetValue("Icon", "\"" + pathexecutable + "\"");
-                    Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("*", true).
-                        OpenSubKey("shell", true).OpenSubKey("Condividi con gli utenti online", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
-
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("{0} Exception caught.", e);
-            }
-            //Directory
-            try
-            {
-                if (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Directory\shell\Progetto", "Icon", null) == null)
-                {
-                    Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("Directory", true).
-                    OpenSubKey("shell", true).CreateSubKey("Condividi con gli utenti online").SetValue("Icon", "\"" + pathexecutable + "\"");
-                    Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("Classes", true).OpenSubKey("Directory", true).
-                        OpenSubKey("shell", true).OpenSubKey("Condividi con gli utenti online", true).CreateSubKey("command").SetValue("", "\"" + pathexecutable + "\"" + " " + "\"" + "%1" + "\"");
-
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("{0} Exception caught.", e);
-            }
-
+            string nameExecutable = Regex.Replace(pathexecutable.Substring(pathexecutable.LastIndexOf('\\')), @"\\", "");
+            File.Copy(pathexecutable, Environment.GetFolderPath(Environment.SpecialFolder.SendTo) + "\\" + nameExecutable, true);
         }
 
     }
