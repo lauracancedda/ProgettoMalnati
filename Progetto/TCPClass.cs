@@ -86,8 +86,8 @@ namespace Progetto
         public void SendFile(byte[] file)
         {
             byte[] buffer = new byte[BUFFER_SIZE];
-            Int32 dim = file.Length;
-            int left = file.Length;
+            Int64 dim = file.LongLength;
+            long left = file.LongLength;
             int offset = 0;
 
             //send size
@@ -97,7 +97,7 @@ namespace Progetto
             stream.Write(dimension, 0, dimension.Length);
             Console.WriteLine("dimensione inviata su {0} byte: {1}",dimension.Length, dim);
 
-            // Send File - Manage send view
+            // Send File
             while (left > 0)
             {
                 if (left >= BUFFER_SIZE)
@@ -124,16 +124,16 @@ namespace Progetto
         public byte[] ReceiveFile()
         {
             byte[] buffer = new byte[BUFFER_SIZE];
-            byte[] receivedDim = new byte[4];
+            byte[] receivedDim = new byte[8];
             byte[] file;
-            int received = 0;
+            long received = 0;
             int nRead;
 
             // ricezione dimensione
             stream.Read(receivedDim, 0, receivedDim.Length);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(receivedDim);
-            Int32 dim = BitConverter.ToInt32(receivedDim, 0);
+            Int64 dim = BitConverter.ToInt64(receivedDim, 0);
             Console.WriteLine("dimensione ricevuta: {0}", dim);
 
             // ricezione file
@@ -142,7 +142,7 @@ namespace Progetto
             while (received < dim)
             {
                 nRead = stream.Read(buffer, 0, buffer.Length);
-                Array.ConstrainedCopy(buffer, 0, file, received, nRead);
+                Array.Copy(buffer, 0, file, received, nRead);
                 received = received + nRead;
             }
 
