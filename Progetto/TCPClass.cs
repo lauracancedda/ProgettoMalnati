@@ -88,27 +88,27 @@ namespace Progetto
             byte[] buffer = new byte[BUFFER_SIZE];
             Int64 dim = file.LongLength;
             long left = file.LongLength;
-            int offset = 0;
+            long offset = 0;
 
             //send size
             byte[] dimension = BitConverter.GetBytes(dim);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
-            Console.WriteLine("dimensione inviata su {0} byte: {1}",dimension.Length, dim);
+            Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
 
             // Send File
             while (left > 0)
             {
                 if (left >= BUFFER_SIZE)
                 {
-                    Array.ConstrainedCopy(file, offset, buffer, 0, BUFFER_SIZE);
+                    Array.Copy(file, offset, buffer, 0, BUFFER_SIZE);
                     stream.Write(buffer, 0, BUFFER_SIZE);
                 }
                 else
                 {
-                    Array.ConstrainedCopy(file, offset, buffer, 0, left);
-                    stream.Write(buffer, 0, left);
+                    Array.Copy(file, offset, buffer, 0, left);
+                    stream.Write(buffer, 0, (int) left);
                 }
                 stream.Flush();
                 offset = offset + BUFFER_SIZE;
@@ -159,34 +159,35 @@ namespace Progetto
             string filePath = (string) f;
             byte[] file = File.ReadAllBytes(filePath);
             byte[] buffer = new byte[BUFFER_SIZE];
-            int dim = file.Length;
-            int left = file.Length;
-            int offset = 0;
+            Int64 dim = file.LongLength;
+            long left = file.LongLength;
+            long offset = 0;
 
             //send size
             byte[] dimension = BitConverter.GetBytes(dim);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
+            Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
 
-            // Send File - Manage send view
-            FormStatusFile formStatusFile = new FormStatusFile(0, dim);
+            // Send File
+            FormStatusFile formStatusFile = new FormStatusFile(0, (int) dim);
             while (formStatusFile.isSendingCanceled() == false && left > 0)
             {
                 if (left >= BUFFER_SIZE)
                 {
-                    Array.ConstrainedCopy(file, offset, buffer, 0, BUFFER_SIZE);
+                    Array.Copy(file, offset, buffer, 0, BUFFER_SIZE);
                     stream.Write(buffer, 0, BUFFER_SIZE);
                 }
                 else
                 {
-                    Array.ConstrainedCopy(file, offset, buffer, 0, left);
-                    stream.Write(buffer, 0, left);
+                    Array.Copy(file, offset, buffer, 0, left);
+                    stream.Write(buffer, 0, (int) left);
                 }
                 stream.Flush();
                 offset = offset + BUFFER_SIZE;
                 left = left - BUFFER_SIZE;
-                formStatusFile.updateProgress(offset);
+                formStatusFile.updateProgress((int) offset);
             }
 
             // Check if the file was sent correctly
@@ -202,9 +203,8 @@ namespace Progetto
             byte[] buffer = new byte[BUFFER_SIZE];
             byte[] receivedDim = new byte[8];
             byte[] file;
-            Int64 dim;
-            int received = 0;
-            int nRead;
+            long received = 0;
+            long nRead;
 
             // connessione
             AcceptConnection();
@@ -213,16 +213,16 @@ namespace Progetto
             stream.Read(receivedDim, 0, receivedDim.Length);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(receivedDim);
-            dim = BitConverter.ToInt64(receivedDim, 0);
+            Int64 dim = BitConverter.ToInt64(receivedDim, 0);
             file = new byte[dim];
             Console.WriteLine("dimensione ricevuta: {0}", dim);
 
             // ricezione file
             stream.ReadTimeout = 1000;
-            while (received < dim && stream.DataAvailable)
+            while (received < dim)
             {
                 nRead = stream.Read(buffer, 0, buffer.Length);
-                Array.ConstrainedCopy(buffer, 0, file, received, nRead);
+                Array.Copy(buffer, 0, file, received, nRead);
                 received = received + nRead;
             }
 
@@ -240,7 +240,6 @@ namespace Progetto
 
             return;
         }
-
     }
 }
 

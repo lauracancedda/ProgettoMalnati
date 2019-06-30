@@ -296,11 +296,11 @@ namespace Progetto
         // invia le richieste di connessione e lancia un thread per ogni destinatario
         public void SendConnection(object users)
         {
-            //if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
-            String path = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
+            if ((string.Compare(pathsendfile, System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User)) != 0) && (System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User) != null))
+                pathsendfile = System.Environment.GetEnvironmentVariable("envvar", EnvironmentVariableTarget.User);
+            String filename = pathsendfile.Substring(pathsendfile.LastIndexOf('/'));
             System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
-            String filename = path.Substring(path.LastIndexOf('/'));
-            FileAttributes attributes = File.GetAttributes(path);
+            FileAttributes attributes = File.GetAttributes(pathsendfile);
             List< Value> usersSelected = (List< Value>) users;
 
             UDPClass udpClient = new UDPClass();
@@ -329,7 +329,7 @@ namespace Progetto
                     tcpSender.Connect(user.ip, Int32.Parse(tcpPort));
 
                     //sgancia thread invio tcp
-                    ThreadPool.QueueUserWorkItem(tcpSender.SendFileBuffered, path);
+                    ThreadPool.QueueUserWorkItem(tcpSender.SendFileBuffered, pathsendfile);
                 }
                 else
                 {
