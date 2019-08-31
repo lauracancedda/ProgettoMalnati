@@ -260,31 +260,28 @@ namespace Progetto
                 }
 
                 //verifica unicità path ed eventualmente lo modifica
-                string modifiedPath = path;
-                path = path + "\\" + filename;
-
-                int count = 0;
+                int count = 1;
+                path = path + "\\";
                 string format = filename.Substring(filename.LastIndexOf('.'));
-
                 filename = filename.TrimEnd(format.ToCharArray());
-                string filenamefix = filename;
+                string modifiedFilename = filename;
                 if (type == "File")
                 {
-                    while (File.Exists(modifiedPath + filename + format) == true)
+                    while (File.Exists(path + modifiedFilename + format) == true)
                     {
-                        filename = filenamefix + "(" + count + ")";
+                        modifiedFilename = filename + "(" + count + ")";
                         count++;
                     }
                 }
                 else
                 {
-                    while (Directory.Exists(modifiedPath + format) == true)
+                    while (Directory.Exists(path + modifiedFilename + format) == true)
                     {
-                        modifiedPath = format + "(" + count + ")";
+                        modifiedFilename = filename + "(" + count + ")";
                         count++;
                     }
                 }
-                modifiedPath = modifiedPath + filename + format;
+                path = path + modifiedFilename + format;
 
                 //crea tcp receiver e invia la porta scelta con udp
                 TCPClass tcpReceiver = new TCPClass();
@@ -292,7 +289,7 @@ namespace Progetto
                 udpConnectionsReceiver.SendPacket(tcpPort.ToString(), remote);
 
                 //sgancia thread ricezione tcp
-                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, modifiedPath);
+                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, path);
             }
         }
 
