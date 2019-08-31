@@ -35,13 +35,11 @@ namespace Progetto
                 //FormSharing
                 string[] args = Environment.GetCommandLineArgs();
                 int numberOfArgs = args.Length;
-                MessageBox.Show("Sono stati selezionati " + (numberOfArgs - 1).ToString() + "file ");
                 string argsConcatenated = "";
                 foreach (string arg in args)
                 {
                     argsConcatenated += arg + " - \n";
                 }
-                MessageBox.Show(argsConcatenated);
                 //Per adesso puo inviare un solo file (cioe il primo che si seleziona args[1]
                 using (NamedPipeServerStream namedPipeServer = new NamedPipeServerStream("pipe-project"))
                 {

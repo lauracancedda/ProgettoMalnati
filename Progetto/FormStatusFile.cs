@@ -29,7 +29,7 @@ namespace Progetto
         public void updateProgress(int sizeFileSent)
         {
             //Normalize better this value LUCIO! 
-            progressBar.Value = (progressBar.Maximum * sizeFileSent) / dimFile;
+            //progressBar.Value = (progressBar.Maximum * sizeFileSent) / dimFile;
         }
 
 

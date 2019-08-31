@@ -28,7 +28,6 @@ namespace Progetto
         private Settings setting;
         private Dictionary<IPAddress, Value> usersMap;
         private Mutex mutex_map;
-        //public static AutoResetEvent pathChanged;
         private Thread sendMulticast;
         private Thread receiveMulticast;
         private Thread manageMap;
@@ -41,7 +40,6 @@ namespace Progetto
             setting = s;
             mutex_map = new Mutex();
             usersMap = new Dictionary<IPAddress, Value>();
-            //pathChanged = new AutoResetEvent(false);
         }
 
         ~MainClass()
@@ -252,7 +250,7 @@ namespace Progetto
                 if (setting.DefaultSelected == false)
                 {
                     FormSelectPath form2 = new FormSelectPath(filename);
-                    form2.Show();
+                    form2.ShowDialog();
                     path = form2.GetPath();
                     form2.Dispose();
                 }
