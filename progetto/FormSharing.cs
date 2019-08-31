@@ -33,54 +33,79 @@ namespace Progetto
             selectedUsers = new List<Value>();
 
             int x, y;
-            x = 1; y = 1;
+            x = 20; y = 20;
             
             if(onlineUsers.Count == 0)
             {
                 Label empty = new Label
                 {
                     Text = "Non ci sono utenti online",
-                    Name = "empty"
+                    Name = "empty",
+                    Margin = new Padding(20)
                 };
                 this.Controls.Add(empty);
                 this.Send.Visible = false;
             }
 
+            // Form layout
+            this.Padding = new Padding(5);
+            this.BackColor = Color.LightBlue;
+
             foreach (KeyValuePair<IPAddress, Value> entry in onlineUsers)
             {
                 Card userCard;
 
-                //Nome UTente
-                userCard.label = new Label
-                {
-                    Text = entry.Value.name,
-                    Name = entry.Value.name
-                };
                 //Image Utente
                 userCard.picture = new PictureBox
                 {
                     Name = "photo",
                     Image = entry.Value.photo,
                     SizeMode = PictureBoxSizeMode.StretchImage,
-                    Size = new Size(75, 75)
+                    Size = new Size(125, 125),
+                    Margin = new Padding(5, 0, 5, 0)
                 };
 
                 //Checkbox Utente
                 userCard.checkbox = new CheckBox
                 {
-                    Name = entry.Value.name
+                    Name = entry.Value.name,
+                    AutoSize = true
                 };
+
+                //Nome UTente
+                userCard.label = new Label
+                {
+                    Text = entry.Value.name,
+                    Name = entry.Value.name,
+                    AutoSize = true,
+                    Padding = new Padding(0, 3, 0, 0)
+                };
+
 
                 //Layout
                 userCard.layout = new FlowLayoutPanel
                 {
                     Location = new Point(x, y),
-                    Size = new Size(100, 150),
-                    BorderStyle = BorderStyle.Fixed3D
+                    Size = new Size(150, 150),
+                    Padding = new Padding(5),
                 };
-                userCard.layout.Controls.Add(userCard.label);
+
+                FlowLayoutPanel bottomPanel = new FlowLayoutPanel
+                {
+                    FlowDirection = FlowDirection.LeftToRight,
+                    WrapContents = false,
+                    Size = new Size(150, 25),
+                };
+
+                bottomPanel.SuspendLayout();
+                bottomPanel.Controls.Add(userCard.checkbox);
+                bottomPanel.Controls.Add(userCard.label);
+                bottomPanel.ResumeLayout();
+
+                userCard.layout.SuspendLayout();
                 userCard.layout.Controls.Add(userCard.picture);
-                userCard.layout.Controls.Add(userCard.checkbox);
+                userCard.layout.Controls.Add(bottomPanel);
+                userCard.layout.ResumeLayout();
 
                 //value Utente
                 userCard.val = entry.Value;
@@ -89,23 +114,19 @@ namespace Progetto
                 this.Controls.Add(userCard.layout);
 
                 // aggiorna coordinate prossimo utente
-                x += 110;
-                if (x >= 1000)
+                x += 170;
+                if (x >= 600)
                 {
-                    x = 0;
-                    y += 150;
+                    x = 20;
+                    y += 170;
                 }
             }
+            this.Send.Top = y + 250;
         }
 
         public List<Value> getSelectedUsers()
         {
             return selectedUsers;
-        }
-
-        private void FormSharing_Load(object sender, EventArgs e)
-        {
-
         }
 
         

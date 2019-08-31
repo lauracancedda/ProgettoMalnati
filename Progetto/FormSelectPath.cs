@@ -16,7 +16,12 @@ namespace Progetto
         public FormSelectPath(string filename)
         {
             InitializeComponent();
-            this.SelectText.Text = "Seleziona la cartella di destinazione per " + filename;
+            this.SelectText.AutoSize = true;
+            this.SelectText.Text = "Seleziona la cartella di destinazione per " + filename.Replace("\\", "");
+            this.SelectText.Dock = DockStyle.Fill;
+            this.AutoSize = true;
+            this.SetAutoSizeMode(AutoSizeMode.GrowAndShrink);
+            this.ChooseFolder.Size = new Size(110, 30);
         }
 
         private void ChooseFolder_Click(object sender, EventArgs e)

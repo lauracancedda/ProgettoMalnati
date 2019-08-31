@@ -109,11 +109,12 @@ namespace Progetto
             Value v;
             if (usersMap.ContainsKey(ip))
             {
-                //utente presente, quindi aggiorno il suo timestamp nella mappa ed eventualmente il nome
+                //utente presente, quindi aggiorno il suo timestamp nella mappa, il nome e le porte
                 usersMap.TryGetValue(ip, out v);
                 v.time = DateTime.Now;
-                if (val.name != v.name)
-                    v.name = val.name;
+                v.name = val.name;
+                v.portImage = val.portImage;
+                v.portRequest = val.portRequest;
             }
             else
             {
@@ -250,8 +251,9 @@ namespace Progetto
                 if (setting.DefaultSelected == false)
                 {
                     FormSelectPath form2 = new FormSelectPath(filename);
+                    form2.ControlBox = false;
                     form2.ShowDialog();
-                    path = form2.GetPath();
+                        path = form2.GetPath();
                     form2.Dispose();
                 }
                 else
