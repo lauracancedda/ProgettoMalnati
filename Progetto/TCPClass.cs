@@ -163,7 +163,7 @@ namespace Progetto
             string pathfile = "";
             //detect whether its a directory or file
 
-            byte[] file = File.ReadAllBytes(pathfile);
+            byte[] file = File.ReadAllBytes(filePath);
             byte[] buffer = new byte[BUFFER_SIZE];
             Int64 dim = file.LongLength;
             long left = file.LongLength;

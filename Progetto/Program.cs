@@ -45,6 +45,7 @@ namespace Progetto
                 {
                     namedPipeServer.WaitForConnection();
                     string path = args[1];
+                    //string path = argsConcatenated;
                     byte[] bytes = Encoding.ASCII.GetBytes(path);
                     // Invio la dimensione del path del file
                     int length = bytes.Length;

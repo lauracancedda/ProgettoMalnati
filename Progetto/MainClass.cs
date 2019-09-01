@@ -305,16 +305,17 @@ namespace Progetto
         // invia le richieste di connessione e lancia un thread per ogni destinatario
         public void SendConnection(object users)
         {
-            String filename = filePath.Substring(filePath.LastIndexOf('\\'));
+            String filename = filePath.Substring(filePath.LastIndexOf('\\')); //Name File or directory
             FileAttributes attributes = File.GetAttributes(filePath);
             List< Value> usersSelected = (List< Value>) users;
             string pathproject = Environment.CurrentDirectory;
             if (attributes.HasFlag(FileAttributes.Directory))
             {
                 // TODO: manage of expression if there is some problem with zip
-                String pathfile = pathproject + "\\" + filename + ".zip";
-                ZipFile.CreateFromDirectory(filePath, pathfile);
-                filename = pathfile;
+                string pathZipFile  = pathproject + "\\" + filename + ".zip";
+                ZipFile.CreateFromDirectory(filePath, pathZipFile);
+                filename = filename + ".zip";
+                filePath = pathZipFile;
             }
                
             UDPClass udpClient = new UDPClass();
