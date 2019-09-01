@@ -228,6 +228,9 @@ namespace Progetto
             }
             catch (Exception ex)
             {
+                if (formStatusFile.InvokeRequired)
+                    formStatusFile.BeginInvoke(new Action(() => { formStatusFile.showdialogset(true); formStatusFile.Close(); formStatusFile.showdialogset(false); }));
+
                 MessageBox.Show("FIle Non inviato : \n " + ex.Message);
             }
                 thread.Join();
@@ -309,6 +312,8 @@ namespace Progetto
             }
             catch (Exception ex)
             {
+                if (formStatusFile.InvokeRequired)
+                    formStatusFile.BeginInvoke(new Action(() => { formStatusFile.showdialogset(true); formStatusFile.Close(); formStatusFile.showdialogset(false); }));
                 MessageBox.Show("FIle Non Ricevuto : \n " + ex.Message);
                 // TODO: check if we need to make some other stuff in case of exception
                 // TODO: better to catch the specific exception for socket closed
