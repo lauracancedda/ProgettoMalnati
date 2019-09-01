@@ -296,7 +296,7 @@ namespace Progetto
                 udpConnectionsReceiver.SendPacket(tcpPort.ToString(), remote);
 
                 //sgancia thread ricezione tcp
-                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, path);
+                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, modifiedPath);
             }
         }
 
