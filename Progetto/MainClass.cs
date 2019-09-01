@@ -11,6 +11,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.IO.Pipes;
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace Progetto
 {
@@ -36,6 +37,8 @@ namespace Progetto
         private Thread receiveUnicast;
         private Thread shareForm;
         private string filePath;
+        Regex rx = new Regex(@"\s(<version>)",
+         RegexOptions.Compiled | RegexOptions.IgnoreCase);
         public MainClass(ref Settings s)
         {
             setting = s;
@@ -283,11 +286,14 @@ namespace Progetto
                 }
                 else
                 {
-                    while (Directory.Exists(path + modifiedFilename + format) == true)
+
+                    while (Directory.Exists(modifiedPath  + filename) == true)
                     {
-                        modifiedPath = format + "(" + count + ")";
+                        filename = filenamefix + "(" + count + ")";
+                        //modifiedPath = path + modifiedFilename;
                         count++;
                     }
+                    //filename = modifiedFilename;
                 }
                 modifiedPath = modifiedPath + filename + format;
 
@@ -297,7 +303,7 @@ namespace Progetto
                 udpConnectionsReceiver.SendPacket(tcpPort.ToString(), remote);
 
                 //sgancia thread ricezione tcp
-                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, modifiedPath);
+                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, new String[] { modifiedPath, type });
             }
         }
 
@@ -312,7 +318,7 @@ namespace Progetto
             if (attributes.HasFlag(FileAttributes.Directory))
             {
                 // TODO: manage of expression if there is some problem with zip
-                string pathZipFile  = pathproject + "\\" + filename + ".zip";
+                String pathZipFile = pathproject + "\\" + filename + ".zip";
                 ZipFile.CreateFromDirectory(filePath, pathZipFile);
                 filename = filename + ".zip";
                 filePath = pathZipFile;

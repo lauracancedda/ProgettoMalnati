@@ -211,15 +211,25 @@ namespace Progetto
         }
 
 
-        public void ReceiveFileBuffered(object f)
+        public void ReceiveFileBuffered(object stateFile)
         {
-            string filePath = (string) f;
+            String[] filePropArray = stateFile as String[];
+            
+            string filePath = filePropArray[0];
+            string fileType = filePropArray[1];
+            String zipName = "";
             byte[] buffer = new byte[BUFFER_SIZE];
             byte[] receivedDim = new byte[8];
             byte[] file;
             long received = 0;
             long nRead;
 
+            if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+            {
+                zipName = filePath.Substring(filePath.LastIndexOf("\\"));
+                Directory.CreateDirectory(filePath.Replace(".zip", ""));
+                filePath = filePath.Replace(".zip", "") + zipName;
+            }
             // connessione
             AcceptConnection();
 
@@ -233,7 +243,7 @@ namespace Progetto
 
 
             // ricezione file
-            stream.ReadTimeout = 1000;
+            stream.ReadTimeout = 5000;
             while (received < dim)
             {
                 nRead = stream.Read(buffer, 0, buffer.Length);
@@ -253,11 +263,9 @@ namespace Progetto
                 Console.WriteLine("file ricevuto");
             }
             //NEW
-            if (filePath.Substring(filePath.LastIndexOf("\\")) == "result.zip")
+            if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
             {
-                // FIle Received is a Folder
-                string extractPath = filePath.Replace("\\result.zip", "");
-                ZipFile.ExtractToDirectory(filePath, extractPath);
+                ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName,""));
                 File.Delete(filePath);
             }
 
