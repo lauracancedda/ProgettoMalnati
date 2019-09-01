@@ -165,7 +165,7 @@ namespace Progetto
             if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
             {
                 //Directory
-                MessageBox.Show("Its a directory");
+                //MessageBox.Show("Its a directory");
                 string pathproject = Environment.CurrentDirectory;
                 ZipFile.CreateFromDirectory(filePath, pathproject + "\\" + "result.zip");
                 pathfile = pathproject + "\\" + "result.zip";
@@ -173,7 +173,7 @@ namespace Progetto
             else
             {
                 //File
-                MessageBox.Show("Its a file");
+                //MessageBox.Show("Its a file");
                 pathfile = filePath;
             }
                 
@@ -184,7 +184,7 @@ namespace Progetto
             Int64 dim = file.LongLength;
             long left = file.LongLength;
             long offset = 0;
-            FormStatusFile formStatusFile = new FormStatusFile(0, (int)dim, pathfile, file, buffer, stream);
+            //FormStatusFile formStatusFile = new FormStatusFile(0, (int)dim, pathfile, file, buffer, stream);
 
             //send size
             byte[] dimension = BitConverter.GetBytes(dim);

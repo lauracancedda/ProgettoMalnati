@@ -264,12 +264,14 @@ namespace Progetto
                 //verifica unicità path ed eventualmente lo modifica
                 string modifiedPath = path;
                 path = path + "\\";
-                
-                filename = filename.TrimEnd(format.ToCharArray());
+                int count = 1;
                 string format = filename.Substring(filename.LastIndexOf('.'));
+                filename = filename.TrimEnd(format.ToCharArray());
+               
 
                 filename = filename.TrimEnd(format.ToCharArray());
                 string filenamefix = filename;
+                string modifiedFilename = filename;
                 if (type == "File")
                 {
                     while (File.Exists(modifiedPath + filename + format) == true)
