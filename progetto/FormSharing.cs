@@ -71,6 +71,8 @@ namespace Progetto
                     Size = new Size(125, 125),
                     Margin = new Padding(5, 0, 5, 0)
                 };
+                if (userCard.picture.Image == null)
+                    userCard.picture.Image = Progetto.Properties.Resources.user;
 
                 //Checkbox Utente
                 userCard.checkbox = new CheckBox
