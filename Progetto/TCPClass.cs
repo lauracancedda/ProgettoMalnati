@@ -162,22 +162,6 @@ namespace Progetto
             FileAttributes attr = File.GetAttributes(filePath);
             string pathfile = "";
             //detect whether its a directory or file
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                //Directory
-                //MessageBox.Show("Its a directory");
-                string pathproject = Environment.CurrentDirectory;
-                ZipFile.CreateFromDirectory(filePath, pathproject + "\\" + "result.zip");
-                pathfile = pathproject + "\\" + "result.zip";
-            }       
-            else
-            {
-                //File
-                //MessageBox.Show("Its a file");
-                pathfile = filePath;
-            }
-                
-
 
             byte[] file = File.ReadAllBytes(pathfile);
             byte[] buffer = new byte[BUFFER_SIZE];

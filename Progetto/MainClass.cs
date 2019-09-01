@@ -10,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.IO.Pipes;
+using System.IO.Compression;
 
 namespace Progetto
 {
@@ -307,18 +308,28 @@ namespace Progetto
             String filename = filePath.Substring(filePath.LastIndexOf('\\'));
             FileAttributes attributes = File.GetAttributes(filePath);
             List< Value> usersSelected = (List< Value>) users;
-
+            string pathproject = Environment.CurrentDirectory;
+            if (attributes.HasFlag(FileAttributes.Directory))
+            {
+                // TODO: manage of expression if there is some problem with zip
+                String pathfile = pathproject + "\\" + filename + ".zip";
+                ZipFile.CreateFromDirectory(filePath, pathfile);
+                filename = pathfile;
+            }
+               
             UDPClass udpClient = new UDPClass();
             udpClient.Bind();
 
             foreach (Value user in usersSelected)
             {
                 //invio filename e tipo
+               
                 IPEndPoint udpEndPoint = new IPEndPoint(user.ip, user.portRequest);
                 udpClient.SendConnectionRequest(udpEndPoint);
                 string answer = udpClient.ReceivePacket(udpEndPoint);
                 if (answer == "YES")
                 {
+                    
                     udpClient.SendPacket(filename, udpEndPoint);
                     if(attributes.HasFlag(FileAttributes.Directory))
                         udpClient.SendPacket("Directory", udpEndPoint);
