@@ -7,7 +7,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
-
+using System.Windows.Forms;
 
 namespace Progetto
 {
@@ -162,6 +162,11 @@ namespace Progetto
             Int64 dim = file.LongLength;
             long left = file.LongLength;
             long offset = 0;
+          
+            // a flag to determinate if we need to stop the sending
+            bool terminateSend = false;
+            // instance of the progress form
+            FormStatusFile formStatusFile = new FormStatusFile(ref terminateSend);
 
             //send size
             byte[] dimension = BitConverter.GetBytes(dim);
@@ -171,27 +176,34 @@ namespace Progetto
             Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
 
             // Send File
-            FormStatusFile formStatusFile = new FormStatusFile(0, (int) dim);
-            while (formStatusFile.isSendingCanceled() == false && left > 0)
+            Thread thread = new Thread(() =>
             {
-                if (left >= BUFFER_SIZE)
-                {
-                    Array.Copy(file, offset, buffer, 0, BUFFER_SIZE);
-                    stream.Write(buffer, 0, BUFFER_SIZE);
+                Application.Run(formStatusFile);
+            });
+            thread.Start();
+           
+            while (!terminateSend && left>0)
+            {
+              
+                    if (left >= BUFFER_SIZE)
+                    {
+                        Array.Copy(file, offset, buffer, 0, BUFFER_SIZE);
+                        stream.Write(buffer, 0, BUFFER_SIZE);
+                    }
+                    else
+                    {
+                        Array.Copy(file, offset, buffer, 0, left);
+                        stream.Write(buffer, 0, (int)left);
+                    }
+                    stream.Flush();
+                    offset = offset + BUFFER_SIZE;
+                    left = left - BUFFER_SIZE;
+                    formStatusFile.UpdateProgress(dim, offset, filePath);
                 }
-                else
-                {
-                    Array.Copy(file, offset, buffer, 0, left);
-                    stream.Write(buffer, 0, (int) left);
-                }
-                stream.Flush();
-                offset = offset + BUFFER_SIZE;
-                left = left - BUFFER_SIZE;
-                formStatusFile.updateProgress((int) offset);
-            }
+            
 
             // Check if the file was sent correctly
-            if (offset < dim && formStatusFile.isSendingCanceled() == false)
+            if (offset < dim)
                 throw new Exception("Invio interrotto");
             return;
         }
