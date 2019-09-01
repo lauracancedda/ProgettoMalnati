@@ -23,33 +23,40 @@ namespace Progetto
 
     public partial class FormSharing : Form
     {
-        private List<Value> selectedUsers;
+        Dictionary<IPAddress, Value> onlineUsers;
         private List<Card> displayedUsers;
+        private List<Value> selectedUsers;
+        private int x;
+        private int y;
         
-        public FormSharing(ref Dictionary<IPAddress, Value> onlineUsers, Settings setting)
+        public FormSharing(Dictionary<IPAddress, Value> onlineUsers, Settings setting)
         {
             InitializeComponent();
+            this.onlineUsers = onlineUsers;
             displayedUsers = new List<Card>();
             selectedUsers = new List<Value>();
-
-            int x, y;
             x = 20; y = 20;
-            
-            if(onlineUsers.Count == 0)
+
+            // Form layout
+            this.Padding = new Padding(5);
+            this.BackColor = Color.LightBlue;
+            drawUsers();
+        }
+
+        private void drawUsers()
+        {
+            if (onlineUsers.Count == 0)
             {
                 Label empty = new Label
                 {
                     Text = "Non ci sono utenti online",
                     Name = "empty",
-                    Margin = new Padding(20)
+                    Location = new Point(10, 10),
+                    AutoSize = true
                 };
                 this.Controls.Add(empty);
                 this.Send.Visible = false;
             }
-
-            // Form layout
-            this.Padding = new Padding(5);
-            this.BackColor = Color.LightBlue;
 
             foreach (KeyValuePair<IPAddress, Value> entry in onlineUsers)
             {
@@ -64,6 +71,8 @@ namespace Progetto
                     Size = new Size(125, 125),
                     Margin = new Padding(5, 0, 5, 0)
                 };
+                if (userCard.picture.Image == null)
+                    userCard.picture.Image = Progetto.Properties.Resources.user;
 
                 //Checkbox Utente
                 userCard.checkbox = new CheckBox
@@ -112,7 +121,6 @@ namespace Progetto
                 displayedUsers.Add(userCard);
 
                 this.Controls.Add(userCard.layout);
-
                 // aggiorna coordinate prossimo utente
                 x += 170;
                 if (x >= 600)
@@ -141,5 +149,19 @@ namespace Progetto
             }
             this.Close();
         }
+
+        private void FormSharing_Load(object sender, EventArgs e)
+        {
+            /*System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+            timer.Interval = (2 * 1000); // 10 secs
+            timer.Tick += new EventHandler(updateForm);
+            timer.Start();*/
+        }
+
+        /*private void updateForm(object sender, EventArgs e)
+        {
+            this.Refresh();
+            Application.DoEvents();
+        }*/
     }
 }
