@@ -262,16 +262,19 @@ namespace Progetto
                 }
 
                 //verifica unicità path ed eventualmente lo modifica
-                int count = 1;
+                string modifiedPath = path;
                 path = path + "\\";
-                string format = filename.Substring(filename.LastIndexOf('.'));
+                
                 filename = filename.TrimEnd(format.ToCharArray());
-                string modifiedFilename = filename;
+                string format = filename.Substring(filename.LastIndexOf('.'));
+
+                filename = filename.TrimEnd(format.ToCharArray());
+                string filenamefix = filename;
                 if (type == "File")
                 {
-                    while (File.Exists(path + modifiedFilename + format) == true)
+                    while (File.Exists(modifiedPath + filename + format) == true)
                     {
-                        modifiedFilename = filename + "(" + count + ")";
+                        filename = filenamefix + "(" + count + ")";
                         count++;
                     }
                 }
@@ -279,11 +282,11 @@ namespace Progetto
                 {
                     while (Directory.Exists(path + modifiedFilename + format) == true)
                     {
-                        modifiedFilename = filename + "(" + count + ")";
+                        modifiedPath = format + "(" + count + ")";
                         count++;
                     }
                 }
-                path = path + modifiedFilename + format;
+                modifiedPath = modifiedPath + filename + format;
 
                 //crea tcp receiver e invia la porta scelta con udp
                 TCPClass tcpReceiver = new TCPClass();

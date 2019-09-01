@@ -7,7 +7,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
-
+using System.IO.Compression;
 
 namespace Progetto
 {
@@ -157,11 +157,34 @@ namespace Progetto
         public void SendFileBuffered(object f)
         {
             string filePath = (string) f;
-            byte[] file = File.ReadAllBytes(filePath);
+
+            //NEW
+            FileAttributes attr = File.GetAttributes(filePath);
+            string pathfile = "";
+            //detect whether its a directory or file
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                //Directory
+                MessageBox.Show("Its a directory");
+                string pathproject = Environment.CurrentDirectory;
+                ZipFile.CreateFromDirectory(filePath, pathproject + "\\" + "result.zip");
+                pathfile = pathproject + "\\" + "result.zip";
+            }       
+            else
+            {
+                //File
+                MessageBox.Show("Its a file");
+                pathfile = filePath;
+            }
+                
+
+
+            byte[] file = File.ReadAllBytes(pathfile);
             byte[] buffer = new byte[BUFFER_SIZE];
             Int64 dim = file.LongLength;
             long left = file.LongLength;
             long offset = 0;
+            FormStatusFile formStatusFile = new FormStatusFile(0, (int)dim, pathfile, file, buffer, stream);
 
             //send size
             byte[] dimension = BitConverter.GetBytes(dim);
@@ -169,6 +192,13 @@ namespace Progetto
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
             Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
+
+
+            //NEW
+            //Delete File Zip created
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                File.Delete(pathfile);
+
 
             // Send File
             FormStatusFile formStatusFile = new FormStatusFile(0, (int) dim);
@@ -217,6 +247,7 @@ namespace Progetto
             file = new byte[dim];
             Console.WriteLine("dimensione ricevuta: {0}", dim);
 
+
             // ricezione file
             stream.ReadTimeout = 1000;
             while (received < dim)
@@ -237,8 +268,17 @@ namespace Progetto
                 File.WriteAllBytes(filePath, file);
                 Console.WriteLine("file ricevuto");
             }
+            //NEW
+            if (filePath.Substring(filePath.LastIndexOf("\\")) == "result.zip")
+            {
+                // FIle Received is a Folder
+                string extractPath = filePath.Replace("\\result.zip", "");
+                ZipFile.ExtractToDirectory(filePath, extractPath);
+                File.Delete(filePath);
+            }
 
-            CloseConnection();
+
+                CloseConnection();
             StopListener();
 
             return;
