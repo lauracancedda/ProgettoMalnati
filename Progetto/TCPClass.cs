@@ -8,6 +8,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.IO.Compression;
+using System.Windows.Forms;
+
 
 namespace Progetto
 {
@@ -169,6 +171,11 @@ namespace Progetto
             long left = file.LongLength;
             long offset = 0;
             //FormStatusFile formStatusFile = new FormStatusFile(0, (int)dim, pathfile, file, buffer, stream);
+          
+            // a flag to determinate if we need to stop the sending
+            bool terminateSend = false;
+            // instance of the progress form
+            FormStatusFile formStatusFile = new FormStatusFile();
 
             //send size
             byte[] dimension = BitConverter.GetBytes(dim);
@@ -185,28 +192,45 @@ namespace Progetto
 
 
             // Send File
-            FormStatusFile formStatusFile = new FormStatusFile(0, (int) dim);
-            while (formStatusFile.isSendingCanceled() == false && left > 0)
+            Thread thread = new Thread(() =>
             {
-                if (left >= BUFFER_SIZE)
+                Application.Run(formStatusFile);
+            });
+            thread.Start();
+            try
+            {
+                while (!terminateSend && left > 0)
                 {
-                    Array.Copy(file, offset, buffer, 0, BUFFER_SIZE);
-                    stream.Write(buffer, 0, BUFFER_SIZE);
-                }
-                else
-                {
-                    Array.Copy(file, offset, buffer, 0, left);
-                    stream.Write(buffer, 0, (int) left);
-                }
-                stream.Flush();
-                offset = offset + BUFFER_SIZE;
-                left = left - BUFFER_SIZE;
-                formStatusFile.updateProgress((int) offset);
-            }
 
-            // Check if the file was sent correctly
-            if (offset < dim && formStatusFile.isSendingCanceled() == false)
-                throw new Exception("Invio interrotto");
+                    if (left >= BUFFER_SIZE)
+                    {
+                        Array.Copy(file, offset, buffer, 0, BUFFER_SIZE);
+                        stream.Write(buffer, 0, BUFFER_SIZE);
+                    }
+                    else
+                    {
+                        Array.Copy(file, offset, buffer, 0, left);
+                        stream.Write(buffer, 0, (int)left);
+                    }
+                    stream.Flush();
+                    offset = offset + BUFFER_SIZE;
+                    left = left - BUFFER_SIZE;
+                    if (formStatusFile.InvokeRequired)
+                        formStatusFile.UpdateProgress(ref terminateSend, offset / 1024, dim / 1024, filePath);
+                }
+
+
+                // Check if the file was sent correctly
+                if (offset < dim)
+                    throw new Exception("Invio interrotto");
+                if (!terminateSend && formStatusFile.InvokeRequired)
+                    formStatusFile.BeginInvoke(new Action(() => { formStatusFile.showdialogset(true); formStatusFile.Close(); formStatusFile.showdialogset(false); }));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("FIle Non inviato : \n " + ex.Message);
+            }
+                thread.Join();
             return;
         }
 
@@ -223,6 +247,10 @@ namespace Progetto
             byte[] file;
             long received = 0;
             long nRead;
+            // a flag to determinate if we need to stop the sending
+            bool terminateSend = false;
+            // instance of the progress form
+            FormStatusFile formStatusFile = new FormStatusFile();
 
             if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
             {
@@ -241,38 +269,53 @@ namespace Progetto
             file = new byte[dim];
             Console.WriteLine("dimensione ricevuta: {0}", dim);
 
-
+            // Send File
+            Thread thread = new Thread(() =>
+            {
+                Application.Run(formStatusFile);
+            });
+            thread.Start();
             // ricezione file
             stream.ReadTimeout = 5000;
-            while (received < dim)
+            try
             {
-                nRead = stream.Read(buffer, 0, buffer.Length);
-                // se nRead viene restituita sbagliata in caso di ultimo blocco < 1024 provare soluzione commentata
-                /*if (nRead != 1024)
-                    nRead = dim - received;*/
-                Array.Copy(buffer, 0, file, received, nRead);
-                received = received + nRead;
-            }
+                while (!terminateSend && received < dim)
+                {
+                    nRead = stream.Read(buffer, 0, buffer.Length);
+                    // se nRead viene restituita sbagliata in caso di ultimo blocco < 1024 provare soluzione commentata
+                    /*if (nRead != 1024)
+                        nRead = dim - received;*/
+                    Array.Copy(buffer, 0, file, received, nRead);
+                    received = received + nRead;
+                    if (formStatusFile.InvokeRequired)
+                        formStatusFile.UpdateProgress(ref terminateSend, received / 1024, dim / 1024, filePath);
+                }
 
-            // controllo se tutto il file è stato inviato
-            if (received < dim)
-                throw new Exception("Invio interrotto");
-            else
+                if (!terminateSend)
+                {
+                    File.WriteAllBytes(filePath, file);
+                    Console.WriteLine("file ricevuto");
+
+                    if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                    {
+                        ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName, ""));
+                        File.Delete(filePath);
+                    }
+
+                    if (formStatusFile.InvokeRequired)
+                        formStatusFile.BeginInvoke(new Action(() => { formStatusFile.showdialogset(true); formStatusFile.Close(); formStatusFile.showdialogset(false); }));
+                }
+
+            }
+            catch (Exception ex)
             {
-                File.WriteAllBytes(filePath, file);
-                Console.WriteLine("file ricevuto");
+                MessageBox.Show("FIle Non Ricevuto : \n " + ex.Message);
+                // TODO: check if we need to make some other stuff in case of exception
+                // TODO: better to catch the specific exception for socket closed
             }
-            //NEW
-            if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
-            {
-                ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName,""));
-                File.Delete(filePath);
-            }
-
-
-                CloseConnection();
+            CloseConnection();
             StopListener();
-
+            thread.Join();
             return;
         }
     }
