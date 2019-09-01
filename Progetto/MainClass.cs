@@ -44,12 +44,6 @@ namespace Progetto
 
         ~MainClass()
         {
-            sendMulticast.Join();
-            receiveMulticast.Join();
-            manageMap.Join();
-            sendImageUnicast.Join();
-            receiveUnicast.Join();
-            shareForm.Join();
         }
 
         // thread principale, lancia 5 thread statici
@@ -66,15 +60,20 @@ namespace Progetto
             // porte utilizzate da comunicare in SendPresentation
             string ports = imagePort + "_" + requestPort;
 
-            // set variabile d'ambiente
-            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
-
             sendImageUnicast = new Thread(ProvidePhoto);
             receiveUnicast = new Thread(ReceiveConnections);
             sendMulticast = new Thread(SendPresentation);
             receiveMulticast = new Thread(ReceivePresentations);
             manageMap = new Thread(CheckMap);
             shareForm = new Thread(ShowFormSharing);
+
+            // i thread saranno tutti background thread, da terminare all'uscita dell'applicazione
+            sendImageUnicast.IsBackground = true;
+            receiveMulticast.IsBackground = true;
+            sendMulticast.IsBackground = true;
+            receiveMulticast.IsBackground = true;
+            manageMap.IsBackground = true;
+            shareForm.IsBackground = true;
 
             sendImageUnicast.Start(imageSender);
             // per consentire al thread di gestire n form: i form coinvolti sono FormConfirmReceive e FormSelectPath

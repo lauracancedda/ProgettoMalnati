@@ -204,7 +204,8 @@ namespace Progetto
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // terminare tutto
+            // termina tutti i thread e chiude l'applicazione
+            Environment.Exit(0);
         }
     }
 }
