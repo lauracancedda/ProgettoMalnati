@@ -37,8 +37,7 @@ namespace Progetto
         private Thread receiveUnicast;
         private Thread shareForm;
         private string filePath;
-        Regex rx = new Regex(@"\s(<version>)",
-         RegexOptions.Compiled | RegexOptions.IgnoreCase);
+      
         public MainClass(ref Settings s)
         {
             setting = s;
@@ -64,6 +63,7 @@ namespace Progetto
             // porte utilizzate da comunicare in SendPresentation
             string ports = imagePort + "_" + requestPort;
 
+            //TODO: we need to pass a shared flag to stop the thread when the program exit
             sendImageUnicast = new Thread(ProvidePhoto);
             receiveUnicast = new Thread(ReceiveConnections);
             sendMulticast = new Thread(SendPresentation);
@@ -71,6 +71,8 @@ namespace Progetto
             manageMap = new Thread(CheckMap);
             shareForm = new Thread(ShowFormSharing);
 
+            // TODO: backgroud is for girls 
+            // we have to remove this once the flag solution is passed 
             // i thread saranno tutti background thread, da terminare all'uscita dell'applicazione
             sendImageUnicast.IsBackground = true;
             receiveMulticast.IsBackground = true;

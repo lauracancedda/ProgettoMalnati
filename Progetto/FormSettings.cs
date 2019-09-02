@@ -19,7 +19,7 @@ namespace Progetto
         MainClass main;
         bool file_modified;
         bool photo_modified;
-        Thread t;
+        Thread t = null;
 
         public FormSettings()
         {
@@ -30,7 +30,8 @@ namespace Progetto
 
         ~FormSettings()
         {
-            t.Join();
+            if(t!=null)
+                t.Join();
         }
 
         private void FormSettings_Load(object sender, EventArgs e)
@@ -173,28 +174,34 @@ namespace Progetto
 
         public void SaveOnFile()
         {
-            if (file_modified == true)
+            try
             {
-                // scrive su file i campi salvati, uno in ogni riga;
-                // in ordine: nome, default, ricezione automatica("yes"/""), modalità("yes"/"")
-                File.Create("configurazione.txt").Close();
-                StreamWriter writer = File.AppendText("configurazione.txt"); ;
-                writer.WriteLine(setting.Name);
-                writer.WriteLine(setting.DefaultPath);
-                if (setting.AutomaticReceive == true)
-                    writer.WriteLine("yes");
-                else
-                    writer.WriteLine("");
-                if (setting.PrivateMode == true)
-                    writer.WriteLine("yes");
-                else
-                    writer.WriteLine("");
-                writer.Close();
-            }
+                if (file_modified == true)
+                {
+                    // scrive su file i campi salvati, uno in ogni riga;
+                    // in ordine: nome, default, ricezione automatica("yes"/""), modalità("yes"/"")
+                    File.Create("configurazione.txt").Close();
+                    StreamWriter writer = File.AppendText("configurazione.txt"); ;
+                    writer.WriteLine(setting.Name);
+                    writer.WriteLine(setting.DefaultPath);
+                    if (setting.AutomaticReceive == true)
+                        writer.WriteLine("yes");
+                    else
+                        writer.WriteLine("");
+                    if (setting.PrivateMode == true)
+                        writer.WriteLine("yes");
+                    else
+                        writer.WriteLine("");
+                    writer.Close();
+                }
 
-            // salva l'immagine
-            if (photo_modified == true)
-                Photo.Image.Save("immagine01.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                // salva l'immagine
+                if (photo_modified == true)
+                    Photo.Image.Save("immagine01.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)

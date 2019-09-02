@@ -110,7 +110,7 @@ namespace Progetto
                 else
                 {
                     Array.Copy(file, offset, buffer, 0, left);
-                    stream.Write(buffer, 0, (int) left);
+                    stream.Write(buffer, 0, (int)left);
                 }
                 stream.Flush();
                 offset = offset + BUFFER_SIZE;
@@ -148,17 +148,13 @@ namespace Progetto
                 received = received + nRead;
             }
 
-            // controllo se tutto il file è stato inviato
-            if (received < dim)
-                throw new Exception("Invio interrotto");
-
             Console.WriteLine("file ricevuto, dimensione {0}", received);
             return file;
         }
 
         public void SendFileBuffered(object f)
         {
-            string filePath = (string) f;
+            string filePath = (string)f;
 
             //NEW
             FileAttributes attr = File.GetAttributes(filePath);
@@ -170,35 +166,33 @@ namespace Progetto
             Int64 dim = file.LongLength;
             long left = file.LongLength;
             long offset = 0;
-            //FormStatusFile formStatusFile = new FormStatusFile(0, (int)dim, pathfile, file, buffer, stream);
-          
+            Thread loadingBarThread = null;
+
             // a flag to determinate if we need to stop the sending
             bool terminateSend = false;
             // instance of the progress form
             FormStatusFile formStatusFile = new FormStatusFile();
-
-            //send size
-            byte[] dimension = BitConverter.GetBytes(dim);
-            if (BitConverter.IsLittleEndian == false)
-                Array.Reverse(dimension);
-            stream.Write(dimension, 0, dimension.Length);
-            Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
-
-
-            //NEW
-            //Delete File Zip created
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                File.Delete(pathfile);
-
-
-            // Send File
-            Thread thread = new Thread(() =>
-            {
-                Application.Run(formStatusFile);
-            });
-            thread.Start();
             try
             {
+                // allocate a separate thread to run the loading bar
+                loadingBarThread = new Thread(() =>
+                {
+                    Application.Run(formStatusFile);
+                });
+                loadingBarThread.Start();
+
+                //send size of the file
+                byte[] dimension = BitConverter.GetBytes(dim);
+                if (BitConverter.IsLittleEndian == false)
+                    Array.Reverse(dimension);
+
+                stream.Write(dimension, 0, dimension.Length);
+                Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
+
+                //Delete File Zip created
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    File.Delete(pathfile);
+
                 while (!terminateSend && left > 0)
                 {
 
@@ -233,7 +227,8 @@ namespace Progetto
 
                 MessageBox.Show("FIle Non inviato : \n " + ex.Message);
             }
-                thread.Join();
+            if (loadingBarThread != null)
+                loadingBarThread.Join();
             return;
         }
 
@@ -241,47 +236,47 @@ namespace Progetto
         public void ReceiveFileBuffered(object stateFile)
         {
             String[] filePropArray = stateFile as String[];
-            
+
             string filePath = filePropArray[0];
             string fileType = filePropArray[1];
             String zipName = "";
             byte[] buffer = new byte[BUFFER_SIZE];
             byte[] receivedDim = new byte[8];
             byte[] file;
+            // set timeout of 5 seconds for readig stream
+            stream.ReadTimeout = 5000;
             long received = 0;
             long nRead;
             // a flag to determinate if we need to stop the sending
             bool terminateSend = false;
             // instance of the progress form
             FormStatusFile formStatusFile = new FormStatusFile();
-
-            if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
-            {
-                zipName = filePath.Substring(filePath.LastIndexOf("\\"));
-                Directory.CreateDirectory(filePath.Replace(".zip", ""));
-                filePath = filePath.Replace(".zip", "") + zipName;
-            }
-            // connessione
-            AcceptConnection();
-
-            // ricezione dimensione
-            stream.Read(receivedDim, 0, receivedDim.Length);
-            if (BitConverter.IsLittleEndian == false)
-                Array.Reverse(receivedDim);
-            Int64 dim = BitConverter.ToInt64(receivedDim, 0);
-            file = new byte[dim];
-            Console.WriteLine("dimensione ricevuta: {0}", dim);
-
-            // Send File
-            Thread thread = new Thread(() =>
-            {
-                Application.Run(formStatusFile);
-            });
-            thread.Start();
-            // ricezione file
-            stream.ReadTimeout = 5000;
+            // declare the thread to load the for for progress bar
+            Thread progressBarThread = null;
             try
             {
+                if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                {
+                    zipName = filePath.Substring(filePath.LastIndexOf("\\"));
+                    Directory.CreateDirectory(filePath.Replace(".zip", ""));
+                    filePath = filePath.Replace(".zip", "") + zipName;
+                }
+                // accept connection and wait for file dimension
+                AcceptConnection();
+                stream.Read(receivedDim, 0, receivedDim.Length);
+                if (BitConverter.IsLittleEndian == false)
+                    Array.Reverse(receivedDim);
+                Int64 dim = BitConverter.ToInt64(receivedDim, 0);
+                file = new byte[dim];
+                Console.WriteLine("dimensione ricevuta: {0}", dim);
+
+                // if we don't use a form the form will get stuck
+                progressBarThread = new Thread(() =>
+                {
+                    Application.Run(formStatusFile);
+                });
+                progressBarThread.Start();
+
                 while (!terminateSend && received < dim)
                 {
                     nRead = stream.Read(buffer, 0, buffer.Length);
@@ -316,11 +311,13 @@ namespace Progetto
                     formStatusFile.BeginInvoke(new Action(() => { formStatusFile.showdialogset(true); formStatusFile.Close(); formStatusFile.showdialogset(false); }));
                 MessageBox.Show("FIle Non Ricevuto : \n " + ex.Message);
                 // TODO: check if we need to make some other stuff in case of exception
-                // TODO: better to catch the specific exception for socket closed
+                // TODO: better to catch the specific exception for socket closed ? 
             }
+            if (progressBarThread != null)
+                progressBarThread.Join();
+
             CloseConnection();
             StopListener();
-            thread.Join();
             return;
         }
     }
