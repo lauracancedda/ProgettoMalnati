@@ -321,6 +321,7 @@ namespace Progetto
                 String pathZipFile = pathproject + "\\" + filename + ".zip";
                 if (File.Exists(pathZipFile))
                     File.Delete(pathZipFile);
+
                 ZipFile.CreateFromDirectory(filePath, pathZipFile);
                 filename = filename + ".zip";
                 filePath = pathZipFile;
