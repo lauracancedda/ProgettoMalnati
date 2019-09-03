@@ -37,8 +37,7 @@ namespace Progetto
         private Thread receiveUnicast;
         private Thread shareForm;
         private string filePath;
-        Regex rx = new Regex(@"\s(<version>)",
-         RegexOptions.Compiled | RegexOptions.IgnoreCase);
+      
         public MainClass(ref Settings s)
         {
             setting = s;
@@ -48,12 +47,6 @@ namespace Progetto
 
         ~MainClass()
         {
-            sendMulticast.Join();
-            receiveMulticast.Join();
-            manageMap.Join();
-            sendImageUnicast.Join();
-            receiveUnicast.Join();
-            shareForm.Join();
         }
 
         // thread principale, lancia 5 thread statici
@@ -70,15 +63,23 @@ namespace Progetto
             // porte utilizzate da comunicare in SendPresentation
             string ports = imagePort + "_" + requestPort;
 
-            // set variabile d'ambiente
-            System.Environment.SetEnvironmentVariable("envvar", "", EnvironmentVariableTarget.User);
-
+            //TODO: we need to pass a shared flag to stop the thread when the program exit
             sendImageUnicast = new Thread(ProvidePhoto);
             receiveUnicast = new Thread(ReceiveConnections);
             sendMulticast = new Thread(SendPresentation);
             receiveMulticast = new Thread(ReceivePresentations);
             manageMap = new Thread(CheckMap);
             shareForm = new Thread(ShowFormSharing);
+
+            // TODO: backgroud is for girls 
+            // we have to remove this once the flag solution is passed 
+            // i thread saranno tutti background thread, da terminare all'uscita dell'applicazione
+            sendImageUnicast.IsBackground = true;
+            receiveMulticast.IsBackground = true;
+            sendMulticast.IsBackground = true;
+            receiveMulticast.IsBackground = true;
+            manageMap.IsBackground = true;
+            shareForm.IsBackground = true;
 
             sendImageUnicast.Start(imageSender);
             // per consentire al thread di gestire n form: i form coinvolti sono FormConfirmReceive e FormSelectPath
@@ -96,41 +97,39 @@ namespace Progetto
         {
             while (true)
             {
-                foreach (KeyValuePair<IPAddress, Value> entry in usersMap)
+                // ciclo inverso per modificare la mappa mentre viene attraversata
+                for (int i = usersMap.Count - 1; i >= 0; i--)
                 {
-                    if ((DateTime.Now.Millisecond - entry.Value.time.Millisecond) > 5000)
+                    DateTime currentTime = usersMap.ElementAt(i).Value.time;
+                    TimeSpan elapsedTime = DateTime.Now.Subtract(currentTime);
+                    if (elapsedTime.TotalMilliseconds > 4000)
                     {
                         mutex_map.WaitOne();
-                        usersMap.Remove(entry.Key);
+                        usersMap.Remove(usersMap.ElementAt(i).Key);
                         mutex_map.ReleaseMutex();
                     }
                 }
-                Thread.Sleep(4000);
+                Thread.Sleep(3000);
             }
         }
         public void MapRefresh(IPAddress ip, Value val)
         {
-            Value v;
+            Value v = new Value();
+            v.name = val.name;
+            v.time = DateTime.Now;
+            v.portImage = val.portImage;
+            v.portRequest = val.portRequest;
+            v.ip = ip;
+
             if (usersMap.ContainsKey(ip))
             {
-                //utente presente, quindi aggiorno il suo timestamp nella mappa, il nome e le porte
-                usersMap.TryGetValue(ip, out v);
-                v.time = DateTime.Now;
-                v.name = val.name;
-                v.portImage = val.portImage;
-                v.portRequest = val.portRequest;
+                //utente presente, lo aggiorno
+                v.photo = usersMap[ip].photo;
+                usersMap[ip] = v;
             }
             else
             {
-                //Utente non presente
-                v.name = val.name;
-                v.time = val.time;
-
-                v.ip = ip;
-                v.portImage = val.portImage;
-                v.portRequest = val.portRequest;
-
-                //richiedo la foto
+                //Utente non presente, richiedo la foto
                 TCPClass tcpclass = new TCPClass();
                 tcpclass.CreateRequester();
                 tcpclass.Connect(ip, val.portImage);
@@ -183,7 +182,7 @@ namespace Progetto
             {
                 setting.publicMode.WaitOne();
                 udp.SendPacketMulticast(setting.Name.Trim('_') + "_" + (string)ports);
-                Thread.Sleep(5000);
+                Thread.Sleep(2000);
             }
         }
 
@@ -379,12 +378,13 @@ namespace Progetto
                     // la lettura da pipe e' bloccante, quindi si aspetta che l'altro processo invii il path
                     namedPipeClient.Read(path, 0, pathLength);
                     filePath = System.Text.Encoding.UTF8.GetString(path);
-                    FormSharing formSharing = new FormSharing(ref usersMap, setting);
+                    FormSharing formSharing = new FormSharing(usersMap, setting);
                     formSharing.ShowDialog(); // controllare corsa critica per show e get dei valori
                     if (formSharing.getSelectedUsers().Count > 0)
                         ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());
                     Console.WriteLine("Ricevuto tramite pipe il path " + filePath);
                     namedPipeClient.Close();
+                    formSharing.Dispose();
                 }
             }
 
