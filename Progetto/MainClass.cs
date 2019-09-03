@@ -319,6 +319,8 @@ namespace Progetto
             {
                 // TODO: manage of expression if there is some problem with zip
                 String pathZipFile = pathproject + "\\" + filename + ".zip";
+                if (File.Exists(pathZipFile))
+                    File.Delete(pathZipFile);
                 ZipFile.CreateFromDirectory(filePath, pathZipFile);
                 filename = filename + ".zip";
                 filePath = pathZipFile;
