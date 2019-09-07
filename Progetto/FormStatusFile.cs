@@ -12,38 +12,42 @@ namespace Progetto
 {
     public partial class FormStatusFile : Form
     {
-        private bool sendCanceled = false;
-        private int dimFile;
-        public FormStatusFile(int progress, int dimension)
+        private bool terminate;
+        public FormStatusFile()
         {
             InitializeComponent();
-            progressBar.Value = progress;
-            dimFile = dimension;
-
+            terminate = false;
+            progressBar.MarqueeAnimationSpeed = 0;
+            progressBar.Style = ProgressBarStyle.Blocks;
+            progressBar.Value = progressBar.Minimum;
+            progressBar.MarqueeAnimationSpeed = 10;
+            this.MaximizeBox = false;
         }
 
-        private void FormStatusFile_Load(object sender, EventArgs e)
+
+        public void UpdateProgress(ref bool terminateRef, long actualReceived, long dimFile, String FileName)
         {
-        }
+            if (terminate == true)
+            {
+                terminateRef = true;
+                return;
+            }
 
-        public void updateProgress(int sizeFileSent)
-        {
-            //Normalize better this value LUCIO! 
-            //progressBar.Value = (progressBar.Maximum * sizeFileSent) / dimFile;
+            progressBar.BeginInvoke(new Action(() =>
+            {
+                progressBar.Value = ((int)((((long)progressBar.Maximum) * actualReceived) / dimFile));
+                if (dimFile / 1024 == 0)
+                    label1.Text = " Invio in corso: " + actualReceived + "/" + dimFile + " KB" + "\n File: " + FileName;
+                else
+                    label1.Text = " Invio in corso: " + actualReceived / 1024 + "/" + dimFile / 1024 + " MB" + "\n File: " + FileName;
+            }));
         }
-
 
 
         private void cancel_Click(object sender, EventArgs e)
         {
-            sendCanceled = true;
-            MessageBox.Show("Invio annullato!");
+            terminate = true;
             this.Close();
-        }
-
-        public bool isSendingCanceled()
-        {
-            return sendCanceled;
         }
     }
 }

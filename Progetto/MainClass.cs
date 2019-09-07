@@ -250,7 +250,6 @@ namespace Progetto
                 if (setting.DefaultSelected == false)
                 {
                     FormSelectPath form2 = new FormSelectPath(filename);
-                    form2.ControlBox = false;
                     form2.ShowDialog();
                         path = form2.GetPath();
                     form2.Dispose();
