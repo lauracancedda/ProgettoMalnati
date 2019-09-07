@@ -7,7 +7,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
-
+using System.IO.Compression;
 
 namespace Progetto
 {
@@ -157,6 +157,8 @@ namespace Progetto
         public void SendFileBuffered(object f)
         {
             string filePath = (string) f;
+            FileAttributes attr = File.GetAttributes(filePath);
+            string zipFolderPath = "";
             byte[] file = File.ReadAllBytes(filePath);
             byte[] buffer = new byte[BUFFER_SIZE];
             Int64 dim = file.LongLength;
@@ -169,6 +171,10 @@ namespace Progetto
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
             Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
+
+            //Delete File Zip created
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                File.Delete(zipFolderPath);
 
             // Send File
             FormStatusFile formStatusFile = new FormStatusFile(0, (int) dim);
@@ -199,13 +205,22 @@ namespace Progetto
 
         public void ReceiveFileBuffered(object f)
         {
-            string filePath = (string) f;
+            string[] fileProperties = f as String[];
+            string filePath = fileProperties[0];
+            string fileType = fileProperties[1];
+            string zipName = "";
             byte[] buffer = new byte[BUFFER_SIZE];
             byte[] receivedDim = new byte[8];
             byte[] file;
             long received = 0;
             long nRead;
 
+            if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+            {
+                zipName = filePath.Substring(filePath.LastIndexOf("\\"));
+                Directory.CreateDirectory(filePath.Replace(".zip", ""));
+                filePath = filePath.Replace(".zip", "") + zipName;
+            }
             // connessione
             AcceptConnection();
 
@@ -236,6 +251,11 @@ namespace Progetto
             {
                 File.WriteAllBytes(filePath, file);
                 Console.WriteLine("file ricevuto");
+                if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                {
+                    ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName, ""));
+                    File.Delete(filePath);
+                }
             }
 
             CloseConnection();

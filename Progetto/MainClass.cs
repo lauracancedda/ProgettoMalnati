@@ -10,6 +10,8 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.IO.Pipes;
+using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace Progetto
 {
@@ -274,7 +276,7 @@ namespace Progetto
                 }
                 else
                 {
-                    while (Directory.Exists(path + modifiedFilename + format) == true)
+                    while (Directory.Exists(path + modifiedFilename) == true)
                     {
                         modifiedFilename = filename + "(" + count + ")";
                         count++;
@@ -288,7 +290,7 @@ namespace Progetto
                 udpConnectionsReceiver.SendPacket(tcpPort.ToString(), remote);
 
                 //sgancia thread ricezione tcp
-                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, path);
+                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, new String[] {path, type});
             }
         }
 
@@ -299,6 +301,18 @@ namespace Progetto
             String filename = filePath.Substring(filePath.LastIndexOf('\\'));
             FileAttributes attributes = File.GetAttributes(filePath);
             List< Value> usersSelected = (List< Value>) users;
+
+            // crea cartella zippata nella cartella di progetto e sostituisce filepath e filename
+            string projectPath = Environment.CurrentDirectory;
+            if (attributes.HasFlag(FileAttributes.Directory))
+            {
+                String zipFolderPath = projectPath + "\\" + filename + ".zip";
+                if (File.Exists(zipFolderPath))
+                    File.Delete(zipFolderPath);
+                ZipFile.CreateFromDirectory(filePath, zipFolderPath);
+                filename = filename + ".zip";
+                filePath = zipFolderPath;
+            }
 
             UDPClass udpClient = new UDPClass();
             udpClient.Bind();

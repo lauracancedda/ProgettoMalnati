@@ -17,7 +17,9 @@ namespace Progetto
         {
             InitializeComponent();
             this.SelectText.AutoSize = true;
-            this.SelectText.Text = "Seleziona la cartella di destinazione per " + filename.Replace("\\", "");
+            string format = filename.Substring(filename.LastIndexOf('.'));
+            filename = filename.TrimEnd(format.ToCharArray());
+            this.SelectText.Text = "Seleziona la cartella di destinazione per '" + filename.Replace("\\", "") + "'";
             this.SelectText.Dock = DockStyle.Fill;
             this.AutoSize = true;
             this.SetAutoSizeMode(AutoSizeMode.GrowAndShrink);
