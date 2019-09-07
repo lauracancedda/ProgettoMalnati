@@ -27,7 +27,7 @@ namespace Progetto
     {
         private Settings setting;
         private Dictionary<IPAddress, Value> usersMap;
-        private Mutex mutex_map;
+        public Mutex mutex_map;
         private Thread sendMulticast;
         private Thread receiveMulticast;
         private Thread manageMap;
@@ -96,7 +96,7 @@ namespace Progetto
                 {
                     DateTime currentTime = usersMap.ElementAt(i).Value.time;
                     TimeSpan elapsedTime = DateTime.Now.Subtract(currentTime);
-                    if (elapsedTime.TotalMilliseconds > 4000)
+                    if (elapsedTime.TotalMilliseconds > 3000)
                     {
                         mutex_map.WaitOne();
                         usersMap.Remove(usersMap.ElementAt(i).Key);
@@ -350,7 +350,7 @@ namespace Progetto
                     // la lettura da pipe e' bloccante, quindi si aspetta che l'altro processo invii il path
                     namedPipeClient.Read(path, 0, pathLength);
                     filePath = System.Text.Encoding.UTF8.GetString(path);
-                    FormSharing formSharing = new FormSharing(usersMap, setting);
+                    FormSharing formSharing = new FormSharing(usersMap, mutex_map);
                     formSharing.ShowDialog(); // controllare corsa critica per show e get dei valori
                     if (formSharing.getSelectedUsers().Count > 0)
                         ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());

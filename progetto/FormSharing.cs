@@ -20,22 +20,35 @@ namespace Progetto
         public CheckBox checkbox;
         public Value val;
     }
+    static class Constants
+    {
+        public const int xInit = 20;
+        public const int yInit = 20;
+    }
 
     public partial class FormSharing : Form
     {
-        Dictionary<IPAddress, Value> onlineUsers;
+        private Dictionary<IPAddress, Value> onlineUsers;
+        private Mutex mutexMap;
         private List<Card> displayedUsers;
         private List<Value> selectedUsers;
         private int x;
         private int y;
-        
-        public FormSharing(Dictionary<IPAddress, Value> onlineUsers, Settings setting)
+        private Label empty = new Label
+        {
+            Text = "Non ci sono utenti online",
+            Name = "empty",
+            Location = new Point(10, 10),
+            AutoSize = true
+        };
+
+        public FormSharing(Dictionary<IPAddress, Value> onlineUsers, Mutex mutexMap)
         {
             InitializeComponent();
             this.onlineUsers = onlineUsers;
+            this.mutexMap = mutexMap;
             displayedUsers = new List<Card>();
             selectedUsers = new List<Value>();
-            x = 20; y = 20;
 
             // Form layout
             this.Padding = new Padding(5);
@@ -45,18 +58,17 @@ namespace Progetto
 
         private void drawUsers()
         {
+            x = Constants.xInit;
+            y = Constants.yInit;
+
+            mutexMap.WaitOne();
             if (onlineUsers.Count == 0)
             {
-                Label empty = new Label
-                {
-                    Text = "Non ci sono utenti online",
-                    Name = "empty",
-                    Location = new Point(10, 10),
-                    AutoSize = true
-                };
                 this.Controls.Add(empty);
                 this.Send.Visible = false;
             }
+            else
+                this.Send.Visible = true;
 
             foreach (KeyValuePair<IPAddress, Value> entry in onlineUsers)
             {
@@ -125,10 +137,11 @@ namespace Progetto
                 x += 170;
                 if (x >= 600)
                 {
-                    x = 20;
+                    x = Constants.xInit;
                     y += 170;
                 }
             }
+            mutexMap.ReleaseMutex();
             this.Send.Top = y + 250;
         }
 
@@ -152,16 +165,43 @@ namespace Progetto
 
         private void FormSharing_Load(object sender, EventArgs e)
         {
-            /*System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-            timer.Interval = (2 * 1000); // 10 secs
+            // aggiorna il form ogni 2 secondi
+            System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+            timer.Interval = (2 * 1000);
             timer.Tick += new EventHandler(updateForm);
-            timer.Start();*/
+            timer.Start();
         }
 
-        /*private void updateForm(object sender, EventArgs e)
+        private void updateForm(object sender, EventArgs e)
         {
-            this.Refresh();
-            Application.DoEvents();
-        }*/
+            // controlla se il contenuto del form coincide con il contenuto della mappa
+            Boolean contentChanged = false;
+            mutexMap.WaitOne();
+            if (onlineUsers.Count != displayedUsers.Count)
+                contentChanged = true;
+            if(contentChanged == false)
+            {
+                foreach (Card userCard in displayedUsers)
+                {
+                    if (!onlineUsers.ContainsKey(userCard.val.ip))
+                        contentChanged = true;
+                }
+            }
+            mutexMap.ReleaseMutex();
+
+            // contenuti diversi, ridisegna il form
+            if (contentChanged)
+            {
+                // le card vengono eliminate dalla memoria, il label empty solo nascosto
+                foreach (Card c in displayedUsers)
+                {
+                    FlowLayoutPanel u = c.layout;
+                    u.Dispose();
+                }
+                this.Controls.Remove(empty);
+                displayedUsers.Clear();
+                drawUsers();
+            }
+        }
     }
 }
