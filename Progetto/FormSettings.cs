@@ -19,7 +19,7 @@ namespace Progetto
         MainClass main;
         bool file_modified;
         bool photo_modified;
-        Thread t;
+        Thread tStartApp = null;
 
         public FormSettings()
         {
@@ -30,7 +30,11 @@ namespace Progetto
 
         ~FormSettings()
         {
-            t.Join();
+            if(tStartApp!=null)
+            {
+                tStartApp.Join();
+                tStartApp = null;
+            }         
         }
 
         private void FormSettings_Load(object sender, EventArgs e)
@@ -120,11 +124,11 @@ namespace Progetto
 
 
             // lancia il thread principale
-            if (t == null)
+            if (tStartApp == null)
             {
                 main = new MainClass(ref setting);
-                t = new Thread(main.Start);
-                t.Start();
+                tStartApp = new Thread(main.Start);
+                tStartApp.Start();
             }
 
             // Read the Path exe and send
@@ -204,9 +208,12 @@ namespace Progetto
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            TerminationHandler.Instance.setTermination();
+            setting.publicMode.Set();
             this.NotificationIcon.Dispose();
             // termina tutti i thread e chiude l'applicazione
             Environment.Exit(0);
+
         }
     }
 }

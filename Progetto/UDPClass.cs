@@ -14,6 +14,7 @@ namespace Progetto
         private UdpClient client;               //client che si occupa di inviare/ricevere la presentazione al gruppo
         private IPEndPoint remoteEndPoint;      //Ip e porta per inviare la presentazione
         private IPEndPoint anyEndPoint;         //Ip e porta per ricevere la presentazione
+        private static int TIMEOUT_SOCKET = 5000; // set 5 seconds of timeout
 
         public UDPClass()
         {
@@ -25,6 +26,7 @@ namespace Progetto
         public void MulticastSubscription()
         {
             client = new UdpClient(1500);    // porta del multicast per poter ricevere
+            client.Client.ReceiveTimeout = TIMEOUT_SOCKET;
             client.JoinMulticastGroup(ipMulticast);
         }
 
@@ -32,6 +34,7 @@ namespace Progetto
         public int Bind()
         {
             client = new UdpClient(0);
+            client.Client.ReceiveTimeout = TIMEOUT_SOCKET;
             int portUsed = ((IPEndPoint)client.Client.LocalEndPoint).Port;
             return portUsed;
         }
@@ -80,13 +83,24 @@ namespace Progetto
 
         public IPEndPoint ReceiveConnectionRequest()
         {
+            string received = "";
             //permette di ricevere datagram da ogni sorgente
             IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            while (!TerminationHandler.Instance.isTerminationRequired())
+            {
+                try
+                {
+                    //bloccante finché non arriva un messaggio dall'host remoto
+                    Byte[] receivedBytes = client.Receive(ref RemoteIpEndPoint);
+                    received = Encoding.ASCII.GetString(receivedBytes);
 
-            //bloccante finché non arriva un messaggio dall'host remoto
-            Byte[] receivedBytes = client.Receive(ref RemoteIpEndPoint);
-            string received = Encoding.ASCII.GetString(receivedBytes);
-
+                }
+                catch (SocketException ex)
+                {
+                    //TODO log the error timeout here
+                    Console.WriteLine(ex.Message);
+                }
+            }
             if (received == "Richiesta Invio")
             {
                 return RemoteIpEndPoint;

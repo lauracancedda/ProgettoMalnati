@@ -19,7 +19,7 @@ namespace Progetto
         private TcpClient connectedClient;
         private NetworkStream stream;
         private const int BUFFER_SIZE = 1024;
-
+        private static int TIMEOUT_SOCKET = 5000; // set 5 seconds of timeout
 
         public TCPClass()
         {
@@ -30,6 +30,7 @@ namespace Progetto
         {
             int portUsed = port;
             listener = new TcpListener(address, port);
+            listener.Server.ReceiveTimeout = TIMEOUT_SOCKET;
             listener.Start();
 
             if (port == 0)
@@ -59,6 +60,7 @@ namespace Progetto
         public void CreateRequester()
         {
             requester = new TcpClient();
+            requester.Client.ReceiveTimeout = TIMEOUT_SOCKET;
         }
 
         public void Connect(IPAddress address, int port)
