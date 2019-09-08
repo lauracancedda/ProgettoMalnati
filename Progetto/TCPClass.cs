@@ -20,7 +20,7 @@ namespace Progetto
         private TcpClient connectedClient;
         private NetworkStream stream;
         private const int BUFFER_SIZE = 1024;
-        private static int TIMEOUT_SOCKET = 5000; // set 5 seconds of timeout
+        private static int TIMEOUT_SOCKET = 20000; // set 5 seconds of timeout
 
         public TCPClass()
         {
@@ -179,9 +179,9 @@ namespace Progetto
             long offset = 0;
             Thread loadingBarThread = null;
             bool terminateSend = false;
-
+            String formTtitle = "Invio file";
             // lancia la progress bar su un thread separato
-            FormStatusFile formStatusFile = new FormStatusFile();
+            FormStatusFile formStatusFile = new FormStatusFile(formTtitle);
             loadingBarThread = new Thread(() =>
             {
                 Application.Run(formStatusFile);
@@ -248,6 +248,10 @@ namespace Progetto
             {
                 MessageBox.Show("Path del file non trovato per estrazione in directory - riprova  \n\n " + ex.Message);
             }
+            catch (IOException ex)
+            {
+                MessageBox.Show("Errore nell'invio del file sulla rete - riprova  \n\n " + ex.Message);
+            }
 
             if (loadingBarThread != null)
             {
@@ -265,6 +269,7 @@ namespace Progetto
             string[] fileProperties = f as String[];
             string filePath = fileProperties[0];
             string fileType = fileProperties[1];
+            string filename = fileProperties[2];
             string zipName = "";
             byte[] buffer = new byte[BUFFER_SIZE];
             byte[] receivedDim = new byte[8];
@@ -273,25 +278,20 @@ namespace Progetto
             long nRead;
             Thread loadingBarThread = null;
             bool terminateReceive = false;
-
+            String formTtitle = "Ricezione file";
             // lancia la progress bar su un thread separato
-            FormStatusFile formStatusFile = new FormStatusFile();
+            FormStatusFile formStatusFile = new FormStatusFile(formTtitle);
             loadingBarThread = new Thread(() =>
             {
                 Application.Run(formStatusFile);
             });
             loadingBarThread.Start();
-            Thread.Sleep(2000);
+
             try
             {
-                if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
-            {
-                zipName = filePath.Substring(filePath.LastIndexOf("\\"));
-                Directory.CreateDirectory(filePath.Replace(".zip", ""));
-                filePath = filePath.Replace(".zip", "") + zipName;
-            }
-            // inizio un try catch qui perchè qualsiasi cosa accada alla connessione bisogna uscire
-           
+               
+                // inizio un try catch qui perchè qualsiasi cosa accada alla connessione bisogna uscire
+
                 // connessione
                 AcceptConnection();
 
@@ -303,9 +303,6 @@ namespace Progetto
                 file = new byte[dim];
                 Console.WriteLine("dimensione ricevuta: {0}", dim);
 
-                // ricezione file
-                stream.ReadTimeout = 1000;
-                // Send File
                 // iteriamo fintanto che :
                 //l'utente non chiede di chiudere l'app
                 // l'utente non chiede di terminare dal form di progress bar
@@ -320,16 +317,45 @@ namespace Progetto
                     received = received + nRead;
                     if (dim < 1024)
                     {
-                        formStatusFile.UpdateProgress(ref terminateReceive, received, dim, filePath);
+                        formStatusFile.UpdateProgress(ref terminateReceive, received, dim, filePath + filename);
                     }
                     else
                     {
-                        formStatusFile.UpdateProgress(ref terminateReceive, received / 1024, dim / 1024, filePath);
+                        formStatusFile.UpdateProgress(ref terminateReceive, received / 1024, dim / 1024, filePath + filename);
                     }
                 }
 
                 if (!terminateReceive && !TerminationHandler.Instance.isTerminationRequired())
                 {
+                    string format = filename.Substring(filename.LastIndexOf('.'));
+                    filename = filename.TrimEnd(format.ToCharArray());
+                    string modifiedFilename = filename;
+                    //verifica unicità path ed eventualmente lo modifica
+                    int count = 1;
+                    if (fileType == "File")
+                    {
+                        while (File.Exists(filePath + modifiedFilename + format) == true)
+                        {
+                            modifiedFilename = filename + "(" + count + ")";
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        while (Directory.Exists(filePath + modifiedFilename) == true)
+                        {
+                            modifiedFilename = filename + "(" + count + ")";
+                            count++;
+                        }
+                    }
+                    filePath = filePath + modifiedFilename + format;
+                    if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                    {
+                        zipName = filePath.Substring(filePath.LastIndexOf("\\"));
+                        Directory.CreateDirectory(filePath.Replace(".zip", ""));
+                        filePath = filePath.Replace(".zip", "") + zipName;
+                    }
+
                     File.WriteAllBytes(filePath, file);
                     Console.WriteLine("file ricevuto");
                     if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
@@ -351,6 +377,10 @@ namespace Progetto
             catch (FileNotFoundException ex)
             {
                 MessageBox.Show("Path del file non trovato per estrazione in directory - riprova  \n\n " + ex.Message);
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show("Errore nell'invio del file sulla rete - riprova  \n\n " + ex.Message);
             }
 
             if (loadingBarThread != null)

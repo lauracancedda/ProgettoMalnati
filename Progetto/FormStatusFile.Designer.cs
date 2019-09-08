@@ -47,10 +47,10 @@
             // 
             this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar.Location = new System.Drawing.Point(36, 87);
-            this.progressBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.progressBar.Margin = new System.Windows.Forms.Padding(4);
             this.progressBar.Maximum = 1000;
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(448, 32);
+            this.progressBar.Size = new System.Drawing.Size(565, 32);
             this.progressBar.TabIndex = 1;
             this.progressBar.Value = 1000;
             // 
@@ -59,9 +59,9 @@
             this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.Cancel.Location = new System.Drawing.Point(215, 146);
-            this.Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Cancel.Margin = new System.Windows.Forms.Padding(4);
             this.Cancel.Name = "Cancel";
-            this.Cancel.Size = new System.Drawing.Size(100, 28);
+            this.Cancel.Size = new System.Drawing.Size(217, 28);
             this.Cancel.TabIndex = 2;
             this.Cancel.Text = "Annulla";
             this.Cancel.UseVisualStyleBackColor = true;
@@ -71,12 +71,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(525, 198);
+            this.ClientSize = new System.Drawing.Size(642, 198);
             this.ControlBox = false;
             this.Controls.Add(this.Cancel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FormStatusFile";

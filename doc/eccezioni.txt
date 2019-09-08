@@ -1,0 +1,35 @@
+eccezioni gestite: 
+
+1 - interrompere la connessione durante invio di un file lato ricezione
+2 - interrompere la connessione durante invio di un file lato invio
+
+1 - chiudere il programma durante invio di un file lato ricezione
+
+2 - chiudere il programma durante invio di un file lato invio
+
+3 - invio di un file con caratteri speciali nel titolo
+
+4 - invio di un file ma il ricevitore lascia in sospeso il form per accettare. 
+
+5 - invio di un file grande  - stacco e riattacco la connessione 
+
+6 - Con form status file aperta se gli altri si sconnettono e riconnettono spuntano dinamicamente
+
+7 - chiusura programma mentre la form per accettare il file è aperta
+
+8 - invio di una cartella/file che è in uso da un altro programma
+
+9 - invio di 3 file consecutivi sia ricezione che invio
+    è stato settato un timeout di 20 secondi ovviamente se si inviano troppi file e di dimensione elevata la banda si satura
+    e il socket va in timeout. Pero è stato gestito
+
+10 - inviare un file e ripetere l'invio dello stesso mentre il precedente è ancora in corso 
+    Bisogna fare il check se il file esiste non all'inizio ma alla fine appena prima di scrivere il
+    file! altrimenti viene sovrascritto
+
+11 - se invio due volte la stessa cartella o lo stesso file molto grande, mentre si crea lo zip, il secondo file non puo essere inviato
+11 - invio e ricezione di file contemporaneamente sullo stesso computer
+
+12 - invio della stessa cartella due volte consecutive mentre il precedente è ancora in corso  - abbiamo messo il titolo che cambia nella barra
+
+13 - 

@@ -311,29 +311,8 @@ namespace Progetto
                             path = setting.DefaultPath;
                         }
 
-                        //verifica unicità path ed eventualmente lo modifica
-                        int count = 1;
+                       
                         path = path + "\\";
-                        string format = filename.Substring(filename.LastIndexOf('.'));
-                        filename = filename.TrimEnd(format.ToCharArray());
-                        string modifiedFilename = filename;
-                        if (type == "File")
-                        {
-                            while (File.Exists(path + modifiedFilename + format) == true)
-                            {
-                                modifiedFilename = filename + "(" + count + ")";
-                                count++;
-                            }
-                        }
-                        else
-                        {
-                    while (Directory.Exists(path + modifiedFilename) == true)
-                            {
-                                modifiedFilename = filename + "(" + count + ")";
-                                count++;
-                            }
-                        }
-                        path = path + modifiedFilename + format;
 
                         //crea tcp receiver e invia la porta scelta con udp
                         TCPClass tcpReceiver = new TCPClass();
@@ -341,11 +320,27 @@ namespace Progetto
                         udpConnectionsReceiver.SendPacket(tcpPort.ToString(), remote);
 
                         //sgancia thread ricezione tcp
-                ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, new String[] {path, type});
+                        ThreadPool.QueueUserWorkItem(tcpReceiver.ReceiveFileBuffered, new String[] {path, type, filename});
                     }
                     catch (SocketException ex)
                     {
-                        MessageBox.Show("Invio non riuscito: problema di connessione \n" + ex.Message);
+                        MessageBox.Show("Ricezione non riuscita: problema di connessione \n" + ex.Message);
+                    }
+                    catch (ArgumentOutOfRangeException ex)
+                    {
+                        MessageBox.Show("Ricezione non riuscita: Non è stato possibile recuperare il nome del file da inviave \n" + ex.Message);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        MessageBox.Show("Ricezione non riuscita: non è possibile ricevere file con caratteri speciali \n cambia il nome del file in invio e riprova" + ex.Message);
+                    }
+                    catch (IOException ex)
+                    {
+                        MessageBox.Show("Ricezione non riuscita: il file che si sta provando a ricevere è in uso da un altro processo \n" + ex.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Ricezione non riuscita: non è stato possibile inviare il file" + ex.Message);
                     }
                 }
             }
@@ -356,26 +351,50 @@ namespace Progetto
         // invia le richieste di connessione e lancia un thread per ogni destinatario
         public void SendConnection(object users)
         {
-            String filename = filePath.Substring(filePath.LastIndexOf('\\'));
-            FileAttributes attributes = File.GetAttributes(filePath);
-            List<Value> usersSelected = (List<Value>)users;
-
-            // crea cartella zippata nella cartella di progetto e sostituisce filepath e filename
-            string projectPath = Environment.CurrentDirectory;
-            if (attributes.HasFlag(FileAttributes.Directory))
-            {
-                String zipFolderPath = projectPath + "\\" + filename + ".zip";
-                if (File.Exists(zipFolderPath))
-                    File.Delete(zipFolderPath);
-                ZipFile.CreateFromDirectory(filePath, zipFolderPath);
-                filename = filename + ".zip";
-                filePath = zipFolderPath;
-            }
-
-            UDPClass udpClient = new UDPClass();
-            udpClient.Bind();
+            String filename = null;
+            FileAttributes attributes;
+            List<Value> usersSelected = null;
             try
             {
+                filename = filePath.Substring(filePath.LastIndexOf('\\'));
+                attributes = File.GetAttributes(filePath);
+                usersSelected = (List<Value>)users;
+                Int64 dimForCheck = 0;
+                // voglio avvisare che il file che l'utente sta per inviare è grande ne prendo la dimensione
+                if (attributes.HasFlag(FileAttributes.Directory))
+                {
+                    dimForCheck = Directory.GetFiles(filePath, "*", SearchOption.AllDirectories).Sum(t => (new FileInfo(t).Length));
+                }
+                else {
+                    byte[] file = File.ReadAllBytes(filePath);
+                    dimForCheck = file.LongLength;
+                }
+                
+                //controllo se la dimensione è piu grande di un gigaByte
+                if (dimForCheck > 1073741824)
+                {
+                    DialogResult dialogResult = MessageBox.Show("Il file/cartella che stai provando ad inviare è molto grande. " +
+                        "Sei sicuro? Potrebbe richiedere tempo la compressione prima dell'invio", "Invio File", MessageBoxButtons.YesNo);
+                   
+                    if (dialogResult == DialogResult.No)
+                    {
+                        return;
+                    }
+                }
+                // crea cartella zippata nella cartella di progetto e sostituisce filepath e filename
+                string projectPath = Environment.CurrentDirectory;
+                if (attributes.HasFlag(FileAttributes.Directory))
+                {
+                    String zipFolderPath = projectPath + "\\" + filename + ".zip";
+                    if (File.Exists(zipFolderPath))
+                        File.Delete(zipFolderPath);
+                    ZipFile.CreateFromDirectory(filePath, zipFolderPath);
+                    filename = filename + ".zip";
+                    filePath = zipFolderPath;
+                }
+
+                UDPClass udpClient = new UDPClass();
+                udpClient.Bind();
                 foreach (Value user in usersSelected)
                 {
                     //invio filename e tipo
@@ -412,6 +431,24 @@ namespace Progetto
             {
                 MessageBox.Show("Invio non riuscito - controlla la connessione: \n" + ex.Message);
             }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                MessageBox.Show("Invio non riuscito: Non è stato possibile recuperare il nome del file da inviave \n" + ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show("Invio non riuscito: non è possibile inviare file con caratteri speciali \n cambia il nome del file e riprova" + ex.Message);
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show("Invio non riuscito: il file che si sta provando a inviare è in uso da un altro processo \n" + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ricezione non riuscita: non è stato possibile inviare il file" + ex.Message);
+            }
+
+
             Console.WriteLine("SendConnection terminated");
         }
 
@@ -431,7 +468,6 @@ namespace Progetto
                         Thread.Sleep(100);
                         byte[] path = new byte[pathLength];
                         // la lettura da pipe e' bloccante, quindi si aspetta che l'altro processo invii il path
-
                         namedPipeClient.Read(path, 0, pathLength);
                         filePath = System.Text.Encoding.UTF8.GetString(path);
                         FormSharing formSharing = new FormSharing(usersMap, mutex_map);

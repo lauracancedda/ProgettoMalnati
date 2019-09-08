@@ -19,9 +19,10 @@ namespace Progetto
         //Form1_shown viene chiamata quando la grafica è pronta
         // non appena la grafica è pronta setto l'evento sul quale updateprogress dorme
         public ManualResetEvent startUpdateProgress;
-        public FormStatusFile()
+        public FormStatusFile(String formTitle)
         {
             InitializeComponent();
+            this.Text = formTitle;
             terminate = false;
             progressBar.MarqueeAnimationSpeed = 0;
             progressBar.Style = ProgressBarStyle.Blocks;
@@ -46,15 +47,17 @@ namespace Progetto
                 terminateRef = true;
                 return;
             }
-
-            progressBar.BeginInvoke(new Action(() =>
+            if (!TerminationHandler.Instance.isTerminationRequired())
             {
-                progressBar.Value = ((int)((((long)progressBar.Maximum) * actualReceived) / dimFile));
-                if (dimFile / 1024 == 0)
-                    label1.Text = " Invio in corso: " + actualReceived + "/" + dimFile + " KB" + "\n File: " + FileName;
-                else
-                    label1.Text = " Invio in corso: " + actualReceived / 1024 + "/" + dimFile / 1024 + " MB" + "\n File: " + FileName;
-            }));
+                progressBar.BeginInvoke(new Action(() =>
+                {
+                    progressBar.Value = ((int)((((long)progressBar.Maximum) * actualReceived) / dimFile));
+                    if (dimFile / 1024 == 0)
+                        label1.Text = " Invio in corso: " + actualReceived + "/" + dimFile + " KB" + "\n File: " + FileName;
+                    else
+                        label1.Text = " Invio in corso: " + actualReceived / 1024 + "/" + dimFile / 1024 + " MB" + "\n File: " + FileName;
+                }));
+            }
         }
 
 
