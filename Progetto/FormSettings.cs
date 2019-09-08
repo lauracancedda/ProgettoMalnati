@@ -216,10 +216,8 @@ namespace Progetto
             var process = Process.GetCurrentProcess();
             string pathExecutable = process.MainModule.FileName;
             setting.UnSetKeyRegedit(pathExecutable);
-
             // termina tutti i thread e chiude l'applicazione
-            Environment.Exit(0);
-
+            Application.Exit();
         }
     }
 }

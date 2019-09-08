@@ -82,7 +82,7 @@ namespace Progetto
         }
 
         // thread principale, lancia 5 thread statici
-        public void Start(Object terminateThread)
+        public void Start()
         {
             // listener TCP utilizzato in ProvidePhoto
 
@@ -133,6 +133,7 @@ namespace Progetto
                 }
                 Thread.Sleep(3000);
             }
+            Console.WriteLine("CheckMap terminated");
         }
         public void MapRefresh(IPAddress ip, Value val)
         {
@@ -199,6 +200,7 @@ namespace Progetto
                     Console.WriteLine(ex.Message);
                 }
             }
+            Console.WriteLine("ReceivePresentations terminated");
         }
 
         // invia in multicast la presentazione name_portImage_portRequest ogni 5 secondi
@@ -221,6 +223,7 @@ namespace Progetto
                     Console.WriteLine(ex.Message);
                 }
             }
+            Console.WriteLine("SendPresentation terminated");
         }
 
 
@@ -232,10 +235,10 @@ namespace Progetto
             while (!TerminationHandler.Instance.isTerminationRequired())
             {
                 setting.publicMode.WaitOne();
+                // accept connection si sblocca e ritorna automaticamente se la terminazione è richiesta
+                tcpImageSender.AcceptConnection();
                 if (!TerminationHandler.Instance.isTerminationRequired())
                 {
-                    tcpImageSender.AcceptConnection();
-
                     string request = tcpImageSender.ReceiveMessage(14);
                     if (setting.PhotoSelected == true)
                     {
@@ -251,6 +254,7 @@ namespace Progetto
                     tcpImageSender.CloseConnection();
                 }
             }
+            Console.WriteLine("ProvidePhoto terminated");
         }
 
         // riceve le richieste di connessione e lancia un thread per ogni ricezione file
@@ -345,7 +349,7 @@ namespace Progetto
                     }
                 }
             }
-
+            Console.WriteLine("ReceiveConnection terminated");
         }
 
 
@@ -408,6 +412,7 @@ namespace Progetto
             {
                 MessageBox.Show("Invio non riuscito - controlla la connessione: \n" + ex.Message);
             }
+            Console.WriteLine("SendConnection terminated");
         }
 
         public void ShowFormSharing()
@@ -443,7 +448,7 @@ namespace Progetto
                     }
                 }
             }
-
+            Console.WriteLine("Thread ShowFormSharing terminated");
         }
     }
 }

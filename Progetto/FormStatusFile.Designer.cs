@@ -36,21 +36,21 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(36, 35);
+            this.label1.Location = new System.Drawing.Point(32, 28);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(111, 20);
+            this.label1.Size = new System.Drawing.Size(99, 17);
             this.label1.TabIndex = 0;
             this.label1.Text = "Caricamento...";
             // 
             // progressBar
             // 
             this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(40, 109);
-            this.progressBar.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.progressBar.Location = new System.Drawing.Point(36, 87);
+            this.progressBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.progressBar.Maximum = 1000;
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(504, 40);
+            this.progressBar.Size = new System.Drawing.Size(448, 32);
             this.progressBar.TabIndex = 1;
             this.progressBar.Value = 1000;
             // 
@@ -58,10 +58,10 @@
             // 
             this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.Cancel.Location = new System.Drawing.Point(242, 183);
-            this.Cancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Cancel.Location = new System.Drawing.Point(215, 146);
+            this.Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Cancel.Name = "Cancel";
-            this.Cancel.Size = new System.Drawing.Size(112, 35);
+            this.Cancel.Size = new System.Drawing.Size(100, 28);
             this.Cancel.TabIndex = 2;
             this.Cancel.Text = "Annulla";
             this.Cancel.UseVisualStyleBackColor = true;
@@ -69,18 +69,19 @@
             // 
             // FormStatusFile
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(591, 247);
+            this.ClientSize = new System.Drawing.Size(525, 198);
             this.ControlBox = false;
             this.Controls.Add(this.Cancel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FormStatusFile";
             this.Text = "Invio File";
+            this.Load += new System.EventHandler(this.FormStatusFile_Load_1);
             this.ResumeLayout(false);
             this.PerformLayout();
 

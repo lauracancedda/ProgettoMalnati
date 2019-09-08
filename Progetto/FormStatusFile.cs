@@ -7,12 +7,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace Progetto
 {
     public partial class FormStatusFile : Form
     {
         private bool terminate;
+        // metto un evento sul quale update progress dorme
+        // non appena la grafica viene caricata  posso fare update delle barra
+        //Form1_shown viene chiamata quando la grafica è pronta
+        // non appena la grafica è pronta setto l'evento sul quale updateprogress dorme
+        public ManualResetEvent startUpdateProgress;
         public FormStatusFile()
         {
             InitializeComponent();
@@ -22,11 +28,19 @@ namespace Progetto
             progressBar.Value = progressBar.Minimum;
             progressBar.MarqueeAnimationSpeed = 10;
             this.MaximizeBox = false;
+            this.Shown += new System.EventHandler(this.Form1_Shown);
+            startUpdateProgress = new ManualResetEvent(false);
         }
 
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            // segnalo che è possibile iniziare il caricamento della barra
+            startUpdateProgress.Set();
+        }
 
         public void UpdateProgress(ref bool terminateRef, long actualReceived, long dimFile, String FileName)
         {
+            startUpdateProgress.WaitOne();
             if (terminate == true)
             {
                 terminateRef = true;
@@ -48,6 +62,16 @@ namespace Progetto
         {
             terminate = true;
             this.Close();
+        }
+
+        private void FormStatusFile_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FormStatusFile_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

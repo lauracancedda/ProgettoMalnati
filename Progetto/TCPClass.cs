@@ -43,7 +43,17 @@ namespace Progetto
 
         public void AcceptConnection()
         {
+            // il timeout non funziona con accept
+            // quindi controlliamo se ci sono connessioni da accettare
+            // se non ci sono controllo se devo uscire
+            while(!listener.Pending())
+            {
+                if (TerminationHandler.Instance.isTerminationRequired())
+                    return;
+                Thread.Sleep(1000);
+            }
             connectedClient = listener.AcceptTcpClient();
+            connectedClient.Client.ReceiveTimeout = TIMEOUT_SOCKET;
             stream = connectedClient.GetStream();
         }
 
@@ -177,50 +187,68 @@ namespace Progetto
                 Application.Run(formStatusFile);
             });
             loadingBarThread.Start();
-            Thread.Sleep(2000);
-
-            //send size
-            byte[] dimension = BitConverter.GetBytes(dim);
-            if (BitConverter.IsLittleEndian == false)
-                Array.Reverse(dimension);
-            stream.Write(dimension, 0, dimension.Length);
-            Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
-
-            //Delete File Zip created
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                File.Delete(zipFolderPath);
-
-            // Send File
-            while (terminateSend == false && left > 0)
+            //Thread.Sleep(2000);
+            try
             {
-                if (left >= BUFFER_SIZE)
-                {
-                    Array.Copy(file, offset, buffer, 0, BUFFER_SIZE);
-                    stream.Write(buffer, 0, BUFFER_SIZE);
-                }
-                else
-                {
-                    Array.Copy(file, offset, buffer, 0, left);
-                    stream.Write(buffer, 0, (int) left);
-                }
-                stream.Flush();
-                offset = offset + BUFFER_SIZE;
-                if (offset > dim)
-                    offset = dim;
-                left = left - BUFFER_SIZE;
+                //send size
+                byte[] dimension = BitConverter.GetBytes(dim);
+                if (BitConverter.IsLittleEndian == false)
+                    Array.Reverse(dimension);
+                stream.Write(dimension, 0, dimension.Length);
+                Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
 
-                //if (formStatusFile.InvokeRequired)
-                formStatusFile.UpdateProgress(ref terminateSend, offset/1024, dim/1024, filePath);
+                //Delete File Zip created
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    File.Delete(zipFolderPath);
+
+                // Send File
+                // iteriamo fintanto che :
+                //l'utente non chiede di chiudere l'app
+                // l'utente non chiede di terminare dal form di progress bar
+                // rimangono byte da inviare
+                while (!TerminationHandler.Instance.isTerminationRequired() && !terminateSend && left > 0)
+                {
+                    if (left >= BUFFER_SIZE)
+                    {
+                        Array.Copy(file, offset, buffer, 0, BUFFER_SIZE);
+                        stream.Write(buffer, 0, BUFFER_SIZE);
+                    }
+                    else
+                    {
+                        Array.Copy(file, offset, buffer, 0, left);
+                        stream.Write(buffer, 0, (int)left);
+                    }
+                    stream.Flush();
+                    offset = offset + BUFFER_SIZE;
+                    if (offset > dim)
+                        offset = dim;
+                    left = left - BUFFER_SIZE;
+
+                    //if (formStatusFile.InvokeRequired)
+                    formStatusFile.UpdateProgress(ref terminateSend, offset / 1024, dim / 1024, filePath);
+                }
+
+            }
+            catch (SocketException ex)
+            {
+                MessageBox.Show("Errore durante la ricezione del file- controlla la connessione \n\n " + ex.Message);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                MessageBox.Show("Path del file/directory non trovato - riprova  \n\n " + ex.Message);
+            }
+            catch (FileNotFoundException ex)
+            {
+                MessageBox.Show("Path del file non trovato per estrazione in directory - riprova  \n\n " + ex.Message);
             }
 
-            // Check if the file was sent correctly
-            if (offset < dim && terminateSend == false)
-                throw new Exception("Invio interrotto");
-
-            if (!terminateSend && formStatusFile.InvokeRequired)
-                formStatusFile.BeginInvoke(new Action(() => { formStatusFile.Close(); }));
             if (loadingBarThread != null)
+            {
+                if(formStatusFile.InvokeRequired)
+                    formStatusFile.BeginInvoke(new Action(() => { formStatusFile.Close(); }));
                 loadingBarThread.Join();
+            }
+                
             return;
         }
 
@@ -247,55 +275,76 @@ namespace Progetto
             });
             loadingBarThread.Start();
             Thread.Sleep(2000);
-
-            if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+            try
+            {
+                if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
             {
                 zipName = filePath.Substring(filePath.LastIndexOf("\\"));
                 Directory.CreateDirectory(filePath.Replace(".zip", ""));
                 filePath = filePath.Replace(".zip", "") + zipName;
             }
-            // connessione
-            AcceptConnection();
+            // inizio un try catch qui perchè qualsiasi cosa accada alla connessione bisogna uscire
+           
+                // connessione
+                AcceptConnection();
 
-            // ricezione dimensione
-            stream.Read(receivedDim, 0, receivedDim.Length);
-            if (BitConverter.IsLittleEndian == false)
-                Array.Reverse(receivedDim);
-            Int64 dim = BitConverter.ToInt64(receivedDim, 0);
-            file = new byte[dim];
-            Console.WriteLine("dimensione ricevuta: {0}", dim);
+                // ricezione dimensione
+                stream.Read(receivedDim, 0, receivedDim.Length);
+                if (BitConverter.IsLittleEndian == false)
+                    Array.Reverse(receivedDim);
+                Int64 dim = BitConverter.ToInt64(receivedDim, 0);
+                file = new byte[dim];
+                Console.WriteLine("dimensione ricevuta: {0}", dim);
 
-            // ricezione file
-            stream.ReadTimeout = 1000;
-            while (terminateReceive == false && received < dim)
-            {
-                nRead = stream.Read(buffer, 0, buffer.Length);
-                // se nRead viene restituita sbagliata in caso di ultimo blocco < 1024 provare soluzione commentata
-                /*if (nRead != 1024)
-                    nRead = dim - received;*/
-                Array.Copy(buffer, 0, file, received, nRead);
-                received = received + nRead;
-                formStatusFile.UpdateProgress(ref terminateReceive, received/1024, dim/1024, filePath);
-            }
-
-            // controllo se tutto il file è stato inviato
-            if (received < dim && terminateReceive == false)
-                throw new Exception("Invio interrotto");
-            if (terminateReceive == false)
-            {
-                File.WriteAllBytes(filePath, file);
-                Console.WriteLine("file ricevuto");
-                if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                // ricezione file
+                stream.ReadTimeout = 1000;
+                // Send File
+                // iteriamo fintanto che :
+                //l'utente non chiede di chiudere l'app
+                // l'utente non chiede di terminare dal form di progress bar
+                // rimangono byte da ricevere
+                while (!TerminationHandler.Instance.isTerminationRequired() && !terminateReceive && received < dim)
                 {
-                    ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName, ""));
-                    File.Delete(filePath);
+                    nRead = stream.Read(buffer, 0, buffer.Length);
+                    // se nRead viene restituita sbagliata in caso di ultimo blocco < 1024 provare soluzione commentata
+                    /*if (nRead != 1024)
+                        nRead = dim - received;*/
+                    Array.Copy(buffer, 0, file, received, nRead);
+                    received = received + nRead;
+                    formStatusFile.UpdateProgress(ref terminateReceive, received / 1024, dim / 1024, filePath);
                 }
-                if (!terminateReceive && formStatusFile.InvokeRequired)
-                    formStatusFile.BeginInvoke(new Action(() => { formStatusFile.Close(); }));
+
+                if (!terminateReceive && !TerminationHandler.Instance.isTerminationRequired())
+                {
+                    File.WriteAllBytes(filePath, file);
+                    Console.WriteLine("file ricevuto");
+                    if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                    {
+                        ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName, ""));
+                        File.Delete(filePath);
+                    }
+                }
+
+            }
+            catch (SocketException ex)
+            {
+                MessageBox.Show("Errore durante la ricezione del file- controlla la connessione \n\n " + ex.Message);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                MessageBox.Show("Path del directory non trovato - riprova  \n\n " + ex.Message);
+            }
+            catch (FileNotFoundException ex)
+            {
+                MessageBox.Show("Path del file non trovato per estrazione in directory - riprova  \n\n " + ex.Message);
             }
 
             if (loadingBarThread != null)
+            {
+                if (formStatusFile.InvokeRequired)
+                    formStatusFile.BeginInvoke(new Action(() => { formStatusFile.Close(); }));
                 loadingBarThread.Join();
+            }
 
             CloseConnection();
             StopListener();
