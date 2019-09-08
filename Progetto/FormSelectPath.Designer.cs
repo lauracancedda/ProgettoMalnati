@@ -39,11 +39,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SelectText.AutoSize = true;
             this.SelectText.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SelectText.Location = new System.Drawing.Point(68, 29);
-            this.SelectText.Margin = new System.Windows.Forms.Padding(10);
+            this.SelectText.Location = new System.Drawing.Point(76, 36);
+            this.SelectText.Margin = new System.Windows.Forms.Padding(11, 12, 11, 12);
             this.SelectText.Name = "SelectText";
-            this.SelectText.Padding = new System.Windows.Forms.Padding(10);
-            this.SelectText.Size = new System.Drawing.Size(20, 45);
+            this.SelectText.Padding = new System.Windows.Forms.Padding(11, 12, 11, 12);
+            this.SelectText.Size = new System.Drawing.Size(22, 53);
             this.SelectText.TabIndex = 0;
             this.SelectText.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
@@ -52,10 +52,10 @@
             this.ChooseFolder.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ChooseFolder.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ChooseFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ChooseFolder.Location = new System.Drawing.Point(252, 70);
-            this.ChooseFolder.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
+            this.ChooseFolder.Location = new System.Drawing.Point(284, 88);
+            this.ChooseFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 12);
             this.ChooseFolder.Name = "ChooseFolder";
-            this.ChooseFolder.Size = new System.Drawing.Size(135, 45);
+            this.ChooseFolder.Size = new System.Drawing.Size(152, 56);
             this.ChooseFolder.TabIndex = 1;
             this.ChooseFolder.Text = "Scegli";
             this.ChooseFolder.UseVisualStyleBackColor = true;
@@ -67,13 +67,15 @@
             // 
             // FormSelectPath
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(654, 134);
+            this.ClientSize = new System.Drawing.Size(736, 168);
+            this.ControlBox = false;
             this.Controls.Add(this.ChooseFolder);
             this.Controls.Add(this.SelectText);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "FormSelectPath";
             this.Text = "Ricezione file";
             this.ResumeLayout(false);

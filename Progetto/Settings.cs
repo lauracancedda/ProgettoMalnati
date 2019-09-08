@@ -66,11 +66,16 @@ namespace Progetto
             publicMode = new ManualResetEvent(false);
         }
 
-        public void SetKeyRegedit(string pathexecutable)
+        public void SetKeyRegedit(string pathExecutable)
         {
-            string nameExecutable = Regex.Replace(pathexecutable.Substring(pathexecutable.LastIndexOf('\\')), @"\\", "");
-            File.Copy(pathexecutable, Environment.GetFolderPath(Environment.SpecialFolder.SendTo) + "\\" + nameExecutable, true);
+            string nameExecutable = Regex.Replace(pathExecutable.Substring(pathExecutable.LastIndexOf('\\')), @"\\", "");
+            File.Copy(pathExecutable, Environment.GetFolderPath(Environment.SpecialFolder.SendTo) + "\\" + nameExecutable, true);
         }
 
+        public void UnSetKeyRegedit(string pathExecutable)
+        {
+            string nameExecutable = Regex.Replace(pathExecutable.Substring(pathExecutable.LastIndexOf('\\')), @"\\", "");
+            File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.SendTo) + "\\" + nameExecutable);
+        }
     }
 }

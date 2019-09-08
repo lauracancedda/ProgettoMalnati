@@ -7,7 +7,8 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
-
+using System.IO.Compression;
+using System.Windows.Forms;
 
 namespace Progetto
 {
@@ -159,11 +160,24 @@ namespace Progetto
         public void SendFileBuffered(object f)
         {
             string filePath = (string) f;
+            FileAttributes attr = File.GetAttributes(filePath);
+            string zipFolderPath = "";
             byte[] file = File.ReadAllBytes(filePath);
             byte[] buffer = new byte[BUFFER_SIZE];
             Int64 dim = file.LongLength;
             long left = file.LongLength;
             long offset = 0;
+            Thread loadingBarThread = null;
+            bool terminateSend = false;
+
+            // lancia la progress bar su un thread separato
+            FormStatusFile formStatusFile = new FormStatusFile();
+            loadingBarThread = new Thread(() =>
+            {
+                Application.Run(formStatusFile);
+            });
+            loadingBarThread.Start();
+            Thread.Sleep(2000);
 
             //send size
             byte[] dimension = BitConverter.GetBytes(dim);
@@ -172,9 +186,12 @@ namespace Progetto
             stream.Write(dimension, 0, dimension.Length);
             Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
 
+            //Delete File Zip created
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                File.Delete(zipFolderPath);
+
             // Send File
-            FormStatusFile formStatusFile = new FormStatusFile(0, (int) dim);
-            while (formStatusFile.isSendingCanceled() == false && left > 0)
+            while (terminateSend == false && left > 0)
             {
                 if (left >= BUFFER_SIZE)
                 {
@@ -188,26 +205,55 @@ namespace Progetto
                 }
                 stream.Flush();
                 offset = offset + BUFFER_SIZE;
+                if (offset > dim)
+                    offset = dim;
                 left = left - BUFFER_SIZE;
-                formStatusFile.updateProgress((int) offset);
+
+                //if (formStatusFile.InvokeRequired)
+                formStatusFile.UpdateProgress(ref terminateSend, offset/1024, dim/1024, filePath);
             }
 
             // Check if the file was sent correctly
-            if (offset < dim && formStatusFile.isSendingCanceled() == false)
+            if (offset < dim && terminateSend == false)
                 throw new Exception("Invio interrotto");
+
+            if (!terminateSend && formStatusFile.InvokeRequired)
+                formStatusFile.BeginInvoke(new Action(() => { formStatusFile.Close(); }));
+            if (loadingBarThread != null)
+                loadingBarThread.Join();
             return;
         }
 
 
         public void ReceiveFileBuffered(object f)
         {
-            string filePath = (string) f;
+            string[] fileProperties = f as String[];
+            string filePath = fileProperties[0];
+            string fileType = fileProperties[1];
+            string zipName = "";
             byte[] buffer = new byte[BUFFER_SIZE];
             byte[] receivedDim = new byte[8];
             byte[] file;
             long received = 0;
             long nRead;
+            Thread loadingBarThread = null;
+            bool terminateReceive = false;
 
+            // lancia la progress bar su un thread separato
+            FormStatusFile formStatusFile = new FormStatusFile();
+            loadingBarThread = new Thread(() =>
+            {
+                Application.Run(formStatusFile);
+            });
+            loadingBarThread.Start();
+            Thread.Sleep(2000);
+
+            if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+            {
+                zipName = filePath.Substring(filePath.LastIndexOf("\\"));
+                Directory.CreateDirectory(filePath.Replace(".zip", ""));
+                filePath = filePath.Replace(".zip", "") + zipName;
+            }
             // connessione
             AcceptConnection();
 
@@ -221,7 +267,7 @@ namespace Progetto
 
             // ricezione file
             stream.ReadTimeout = 1000;
-            while (received < dim)
+            while (terminateReceive == false && received < dim)
             {
                 nRead = stream.Read(buffer, 0, buffer.Length);
                 // se nRead viene restituita sbagliata in caso di ultimo blocco < 1024 provare soluzione commentata
@@ -229,16 +275,27 @@ namespace Progetto
                     nRead = dim - received;*/
                 Array.Copy(buffer, 0, file, received, nRead);
                 received = received + nRead;
+                formStatusFile.UpdateProgress(ref terminateReceive, received/1024, dim/1024, filePath);
             }
 
             // controllo se tutto il file è stato inviato
-            if (received < dim)
+            if (received < dim && terminateReceive == false)
                 throw new Exception("Invio interrotto");
-            else
+            if (terminateReceive == false)
             {
                 File.WriteAllBytes(filePath, file);
                 Console.WriteLine("file ricevuto");
+                if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                {
+                    ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName, ""));
+                    File.Delete(filePath);
+                }
+                if (!terminateReceive && formStatusFile.InvokeRequired)
+                    formStatusFile.BeginInvoke(new Action(() => { formStatusFile.Close(); }));
             }
+
+            if (loadingBarThread != null)
+                loadingBarThread.Join();
 
             CloseConnection();
             StopListener();

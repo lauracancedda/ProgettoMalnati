@@ -131,10 +131,10 @@ namespace Progetto
                 tStartApp.Start();
             }
 
-            // Read the Path exe and send
+            // ottiene il path dell'eseguibile e lo aggiunge alla cartella Send To di windows
             var process = Process.GetCurrentProcess();
-            string fullPath = process.MainModule.FileName;
-            setting.SetKeyRegedit(fullPath);
+            string pathExecutable = process.MainModule.FileName;
+            setting.SetKeyRegedit(pathExecutable);
             this.Visible = false;
         }
 
@@ -211,6 +211,12 @@ namespace Progetto
             TerminationHandler.Instance.setTermination();
             setting.publicMode.Set();
             this.NotificationIcon.Dispose();
+
+            // rimuove l'eseguibile dalla cartella Send To di windows
+            var process = Process.GetCurrentProcess();
+            string pathExecutable = process.MainModule.FileName;
+            setting.UnSetKeyRegedit(pathExecutable);
+
             // termina tutti i thread e chiude l'applicazione
             Environment.Exit(0);
 
