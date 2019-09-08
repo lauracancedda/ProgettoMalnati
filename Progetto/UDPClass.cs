@@ -18,7 +18,7 @@ namespace Progetto
 
         public UDPClass()
         {
-            ipMulticast = IPAddress.Parse("224.000.2.0");
+            ipMulticast = IPAddress.Parse("224.0.4.0");
             remoteEndPoint = new IPEndPoint(ipMulticast, 1500);
             anyEndPoint = new IPEndPoint(IPAddress.Any, 1500);
         }
@@ -93,7 +93,12 @@ namespace Progetto
                     //bloccante finché non arriva un messaggio dall'host remoto
                     Byte[] receivedBytes = client.Receive(ref RemoteIpEndPoint);
                     received = Encoding.ASCII.GetString(receivedBytes);
-
+                    if (received == "Richiesta Invio")
+                    {
+                        return RemoteIpEndPoint;
+                    }
+                    else
+                        return null;
                 }
                 catch (SocketException ex)
                 {
@@ -101,12 +106,7 @@ namespace Progetto
                     Console.WriteLine(ex.Message);
                 }
             }
-            if (received == "Richiesta Invio")
-            {
-                return RemoteIpEndPoint;
-            }
-            else
-                return null;
+            return null;
         }
 
         public void SendConnectionRequest(IPEndPoint dest)

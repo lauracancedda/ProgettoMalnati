@@ -426,7 +426,7 @@ namespace Progetto
 
                         namedPipeClient.Connect(5000);
                         int pathLength;
-                        namedPipeClient.ReadTimeout = 2000;
+                      
                         pathLength = namedPipeClient.ReadByte();
                         Thread.Sleep(100);
                         byte[] path = new byte[pathLength];
