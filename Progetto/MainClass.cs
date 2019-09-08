@@ -375,7 +375,8 @@ namespace Progetto
                     {
                         try
                         {
-                            filename = arraypathfile[j].Substring(arraypathfile[j].LastIndexOf('\\'));
+                            filename = arraypathfile[j].Substring(arraypathfile[j].LastIndexOf('\\')).Replace("\\","");
+                            filePath = arraypathfile[j].Replace("\n", "");
                             attributes = File.GetAttributes(filePath);
 
                             Int64 dimForCheck = 0;
