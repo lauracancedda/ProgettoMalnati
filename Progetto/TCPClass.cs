@@ -225,7 +225,14 @@ namespace Progetto
                     left = left - BUFFER_SIZE;
 
                     //if (formStatusFile.InvokeRequired)
-                    formStatusFile.UpdateProgress(ref terminateSend, offset / 1024, dim / 1024, filePath);
+                    if (dim < 1024)
+                    {
+                        formStatusFile.UpdateProgress(ref terminateSend, offset, dim, filePath);
+                    }
+                    else {
+                        formStatusFile.UpdateProgress(ref terminateSend, offset/1024, dim/1024, filePath);
+                    }
+                   
                 }
 
             }
@@ -311,7 +318,14 @@ namespace Progetto
                         nRead = dim - received;*/
                     Array.Copy(buffer, 0, file, received, nRead);
                     received = received + nRead;
-                    formStatusFile.UpdateProgress(ref terminateReceive, received / 1024, dim / 1024, filePath);
+                    if (dim < 1024)
+                    {
+                        formStatusFile.UpdateProgress(ref terminateReceive, received, dim, filePath);
+                    }
+                    else
+                    {
+                        formStatusFile.UpdateProgress(ref terminateReceive, received / 1024, dim / 1024, filePath);
+                    }
                 }
 
                 if (!terminateReceive && !TerminationHandler.Instance.isTerminationRequired())
