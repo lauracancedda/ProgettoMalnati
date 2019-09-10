@@ -49,7 +49,7 @@ namespace Progetto
             this.mutexMap = mutexMap;
             displayedUsers = new List<Card>();
             selectedUsers = new List<Value>();
-
+            this.DialogResult = DialogResult.Cancel;
             // Form layout
             this.Padding = new Padding(5);
             this.BackColor = Color.LightBlue;
@@ -160,6 +160,7 @@ namespace Progetto
                     selectedUsers.Add(userCard.val);
                 }
             }
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
 

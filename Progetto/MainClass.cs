@@ -37,7 +37,7 @@ namespace Progetto
         private Thread sendImageUnicast = null;
         private Thread receiveUnicast = null;
         private Thread shareForm = null;
-        private string filePath = null;
+        
         private static long ONE_GIG = 1073741824;
         public MainClass(ref Settings s)
         {
@@ -362,104 +362,115 @@ namespace Progetto
             udpClient.Bind();
             foreach (Value user in usersSelected)
             {
-                IPEndPoint udpEndPoint = new IPEndPoint(user.ip, user.portRequest);
-                udpClient.SendConnectionRequest(udpEndPoint);
-                string answer = udpClient.ReceivePacket(udpEndPoint);
-                if (answer == "YES")
-                {
-                    udpClient.SendPacket(files.Length.ToString(), udpEndPoint); // Dici quanti file devi inviare
-
-                    for (int j = 0; j < files.Length - 1; j++)
+                try
+                {   // ho bisogno di catchare nel caso in cui il ricevitore non risponsa entro il limite di tempo
+                    IPEndPoint udpEndPoint = new IPEndPoint(user.ip, user.portRequest);
+                    udpClient.SendConnectionRequest(udpEndPoint);
+                    string answer = udpClient.ReceivePacket(udpEndPoint);
+                    if (answer == "YES")
                     {
-                        try
+                        udpClient.SendPacket(files.Length.ToString(), udpEndPoint); // Dici quanti file devi inviare
+
+                        for (int j = 0; j < files.Length - 1; j++)
                         {
-                            filename = files[j].Substring(files[j].LastIndexOf('\\')).Replace("\\", "");
-                            attributes = File.GetAttributes(filePath);
-                            dimForCheck = 0;
-                            // voglio avvisare che il file che l'utente sta per inviare è grande ne prendo la dimensione
-                            if (attributes.HasFlag(FileAttributes.Directory))
+                            try
                             {
-                                dimForCheck = Directory.GetFiles(filePath, "*", SearchOption.AllDirectories).Sum(t => (new FileInfo(t).Length));
-                            }
-                            else
-                            {
-                                byte[] file = File.ReadAllBytes(filePath);
-                                dimForCheck = file.LongLength;
-                            }
-
-                            //controllo se la dimensione è piu grande di un gigaByte
-                            // ho provato a cercare un giga come variabile constante in c# ma non la trovo
-                            // corretto ponerla int64?
-                            if (dimForCheck > ONE_GIG)
-                            {
-                                DialogResult dialogResult = MessageBox.Show("Il file/cartella che stai provando ad inviare è molto grande. " +
-                                    "Sei sicuro? Potrebbe richiedere tempo la compressione prima dell'invio", "Invio File", MessageBoxButtons.YesNo);
-
-                                if (dialogResult == DialogResult.No)
+                                filename = files[j].Substring(files[j].LastIndexOf('\\')).Replace("\\", "");
+                                attributes = File.GetAttributes(files[j]);
+                                dimForCheck = 0;
+                                // voglio avvisare che il file che l'utente sta per inviare è grande ne prendo la dimensione
+                                if (attributes.HasFlag(FileAttributes.Directory))
                                 {
-                                    return;
+                                    dimForCheck = Directory.GetFiles(files[j], "*", SearchOption.AllDirectories).Sum(t => (new FileInfo(t).Length));
                                 }
+                                else
+                                {
+                                    byte[] file = File.ReadAllBytes(files[j]);
+                                    dimForCheck = file.LongLength;
+                                }
+
+                                //controllo se la dimensione è piu grande di un gigaByte
+                                // ho provato a cercare un giga come variabile constante in c# ma non la trovo
+                                // corretto ponerla int64?
+                                if (dimForCheck > ONE_GIG)
+                                {
+                                    DialogResult dialogResult = MessageBox.Show("Il file/cartella che stai provando ad inviare è molto grande. " +
+                                        "Sei sicuro? Potrebbe richiedere tempo la compressione prima dell'invio", "Invio File", MessageBoxButtons.YesNo);
+
+                                    if (dialogResult == DialogResult.No)
+                                    {
+                                        return;
+                                    }
+                                }
+                                // crea cartella zippata nella cartella di progetto e sostituisce filepath e filename
+                                string projectPath = Environment.CurrentDirectory;
+                                if (attributes.HasFlag(FileAttributes.Directory))
+                                {
+                                    // concateno l estension
+                                    String zipFolderPath = projectPath + "\\" + filename + ".zip";
+                                    // se il file esiste lo elimino
+                                    if (File.Exists(zipFolderPath))
+                                        File.Delete(zipFolderPath);
+                                    // creo lo zip
+                                    // questo potrebbe richiedere del tempo
+                                    ZipFile.CreateFromDirectory(files[j], zipFolderPath);
+                                    filename = filename + ".zip";
+                                    files[j] = zipFolderPath;
+                                }
+
+                                udpClient.SendPacket(filename, udpEndPoint);
+                                if (attributes.HasFlag(FileAttributes.Directory))
+                                    udpClient.SendPacket("Directory", udpEndPoint);
+                                else
+                                    udpClient.SendPacket("File", udpEndPoint);
+
+                                // ricezione porta TCP da usare per inviare il file
+                                string tcpPort = udpClient.ReceivePacket(udpEndPoint);
+
+                                //Invio del file
+                                TCPClass tcpSender = new TCPClass();
+                                tcpSender.CreateRequester();
+                                tcpSender.Connect(user.ip, Int32.Parse(tcpPort));
+
+                                //sgancia thread invio tcp
+                                ThreadPool.QueueUserWorkItem(tcpSender.SendFileBuffered, files[j]);
                             }
-                            // crea cartella zippata nella cartella di progetto e sostituisce filepath e filename
-                            string projectPath = Environment.CurrentDirectory;
-                            if (attributes.HasFlag(FileAttributes.Directory))
+                            catch (SocketException ex)
                             {
-                                // concateno l estension
-                                String zipFolderPath = projectPath + "\\" + filename + ".zip";
-                                // se il file esiste lo elimino
-                                if (File.Exists(zipFolderPath))
-                                    File.Delete(zipFolderPath);
-                                // creo lo zip
-                                // questo potrebbe richiedere del tempo
-                                ZipFile.CreateFromDirectory(filePath, zipFolderPath);
-                                filename = filename + ".zip";
-                                filePath = zipFolderPath;
+                                MessageBox.Show("Invio non riuscito del file " + filename + "\n controlla la connessione: \n" + ex.Message);
                             }
+                            catch (ArgumentOutOfRangeException ex)
+                            {
+                                MessageBox.Show("Invio non riuscito:  del file " + filename + "\n Non è stato possibile recuperare il nome del file da inviave \n" + ex.Message);
+                            }
+                            catch (ArgumentException ex)
+                            {
+                                MessageBox.Show("Invio non riuscito del file " + filename + "\n : non è possibile inviare file con caratteri speciali \n cambia il nome del file e riprova\n" + ex.Message);
+                            }
+                            catch (IOException ex)
+                            {
+                                MessageBox.Show("Invio non riuscito  del file " + filename + "\n: il file che si sta provando a inviare è in uso da un altro processo \n" + ex.Message);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Ricezione non riuscita  del file " + filename + "\n: non è stato possibile inviare il file\n" + ex.Message);
+                            }
+                        }
 
-                            udpClient.SendPacket(filename, udpEndPoint);
-                            if (attributes.HasFlag(FileAttributes.Directory))
-                                udpClient.SendPacket("Directory", udpEndPoint);
-                            else
-                                udpClient.SendPacket("File", udpEndPoint);
-
-                            // ricezione porta TCP da usare per inviare il file
-                            string tcpPort = udpClient.ReceivePacket(udpEndPoint);
-
-                            //Invio del file
-                            TCPClass tcpSender = new TCPClass();
-                            tcpSender.CreateRequester();
-                            tcpSender.Connect(user.ip, Int32.Parse(tcpPort));
-
-                            //sgancia thread invio tcp
-                            ThreadPool.QueueUserWorkItem(tcpSender.SendFileBuffered, filePath);
-                        }
-                        catch (SocketException ex)
-                        {
-                            MessageBox.Show("Invio non riuscito del file " + filename + "\n controlla la connessione: \n" + ex.Message);
-                        }
-                        catch (ArgumentOutOfRangeException ex)
-                        {
-                            MessageBox.Show("Invio non riuscito:  del file " + filename + "\n Non è stato possibile recuperare il nome del file da inviave \n" + ex.Message);
-                        }
-                        catch (ArgumentException ex)
-                        {
-                            MessageBox.Show("Invio non riuscito del file " + filename + "\n : non è possibile inviare file con caratteri speciali \n cambia il nome del file e riprova\n" + ex.Message);
-                        }
-                        catch (IOException ex)
-                        {
-                            MessageBox.Show("Invio non riuscito  del file " + filename + "\n: il file che si sta provando a inviare è in uso da un altro processo \n" + ex.Message);
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Ricezione non riuscita  del file " + filename + "\n: non è stato possibile inviare il file\n" + ex.Message);
-                        }
                     }
-
+                    else
+                    {
+                        //Invio rifiutato
+                        MessageBox.Show("Invio non riuscito: l'utente ha rifiutato la ricezione");
+                    }
                 }
-                else
+                catch (SocketException ex)
                 {
-                    //Invio rifiutato
-                    MessageBox.Show("Invio non riuscito: l'utente ha rifiutato la ricezione");
+                    MessageBox.Show("Risposta non ricevuto dall'host " + user.name + "riprova \n" + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Errore nell'invio dei file all'host " + user.name + ex.Message);
                 }
             }
         }
@@ -491,7 +502,7 @@ namespace Progetto
                             // la lettura da pipe e' bloccante, quindi si aspetta che l'altro processo invii il path
                             namedPipeClient.Read(path, 0, pathLength);
                             // prendo il nome del file
-                            filePath = System.Text.Encoding.UTF8.GetString(path);
+                            String filePath = System.Text.Encoding.UTF8.GetString(path);
                             // lo inserisco nell'array
                             filesToSend[i] = filePath;
 
@@ -503,7 +514,7 @@ namespace Progetto
                         {
                             if (formSharing.getSelectedUsers().Count > 0)
                                 ThreadPool.QueueUserWorkItem(unused => this.SendConnection(formSharing.getSelectedUsers(), filesToSend));
-                            Console.WriteLine("Ricevuto tramite pipe il path " + filePath);
+                           
                             formSharing.Dispose();
                         }
                     }
