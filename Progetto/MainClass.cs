@@ -38,7 +38,7 @@ namespace Progetto
         private Thread receiveUnicast = null;
         private Thread shareForm = null;
         private string filePath = null;
-
+        private static long ONE_GIG = 1073741824;
         public MainClass(ref Settings s)
         {
             setting = s;
@@ -353,13 +353,11 @@ namespace Progetto
 
 
         // invia le richieste di connessione e lancia un thread per ogni destinatario
-        public void SendConnection(object users)
+        public void SendConnection(List<Value> usersSelected, String []files)
         {
             String filename = null;
             FileAttributes attributes;
-            string[] arraypathfile = filePath.Split('-');
-            string nFiletoSend = (arraypathfile.Length - 2).ToString();
-            List<Value> usersSelected = (List<Value>)users;
+            long dimForCheck = 0;
             UDPClass udpClient = new UDPClass();
             udpClient.Bind();
             foreach (Value user in usersSelected)
@@ -369,17 +367,15 @@ namespace Progetto
                 string answer = udpClient.ReceivePacket(udpEndPoint);
                 if (answer == "YES")
                 {
-                    udpClient.SendPacket(nFiletoSend, udpEndPoint); // Dici quanti file devi inviare
+                    udpClient.SendPacket(files.Length.ToString(), udpEndPoint); // Dici quanti file devi inviare
 
-                    for (int j = 1; j < arraypathfile.Length - 1; j++)
+                    for (int j = 0; j < files.Length - 1; j++)
                     {
                         try
                         {
-                            filename = arraypathfile[j].Substring(arraypathfile[j].LastIndexOf('\\')).Replace("\\","");
-                            filePath = arraypathfile[j].Replace("\n", "");
+                            filename = files[j].Substring(files[j].LastIndexOf('\\')).Replace("\\", "");
                             attributes = File.GetAttributes(filePath);
-
-                            Int64 dimForCheck = 0;
+                            dimForCheck = 0;
                             // voglio avvisare che il file che l'utente sta per inviare è grande ne prendo la dimensione
                             if (attributes.HasFlag(FileAttributes.Directory))
                             {
@@ -392,7 +388,9 @@ namespace Progetto
                             }
 
                             //controllo se la dimensione è piu grande di un gigaByte
-                            if (dimForCheck > 1073741824)
+                            // ho provato a cercare un giga come variabile constante in c# ma non la trovo
+                            // corretto ponerla int64?
+                            if (dimForCheck > ONE_GIG)
                             {
                                 DialogResult dialogResult = MessageBox.Show("Il file/cartella che stai provando ad inviare è molto grande. " +
                                     "Sei sicuro? Potrebbe richiedere tempo la compressione prima dell'invio", "Invio File", MessageBoxButtons.YesNo);
@@ -406,9 +404,13 @@ namespace Progetto
                             string projectPath = Environment.CurrentDirectory;
                             if (attributes.HasFlag(FileAttributes.Directory))
                             {
+                                // concateno l estension
                                 String zipFolderPath = projectPath + "\\" + filename + ".zip";
+                                // se il file esiste lo elimino
                                 if (File.Exists(zipFolderPath))
                                     File.Delete(zipFolderPath);
+                                // creo lo zip
+                                // questo potrebbe richiedere del tempo
                                 ZipFile.CreateFromDirectory(filePath, zipFolderPath);
                                 filename = filename + ".zip";
                                 filePath = zipFolderPath;
@@ -433,23 +435,23 @@ namespace Progetto
                         }
                         catch (SocketException ex)
                         {
-                            MessageBox.Show("Invio non riuscito - controlla la connessione: \n" + ex.Message);
+                            MessageBox.Show("Invio non riuscito del file " + filename + "\n controlla la connessione: \n" + ex.Message);
                         }
                         catch (ArgumentOutOfRangeException ex)
                         {
-                            MessageBox.Show("Invio non riuscito: Non è stato possibile recuperare il nome del file da inviave \n" + ex.Message);
+                            MessageBox.Show("Invio non riuscito:  del file " + filename + "\n Non è stato possibile recuperare il nome del file da inviave \n" + ex.Message);
                         }
                         catch (ArgumentException ex)
                         {
-                            MessageBox.Show("Invio non riuscito: non è possibile inviare file con caratteri speciali \n cambia il nome del file e riprova" + ex.Message);
+                            MessageBox.Show("Invio non riuscito del file " + filename + "\n : non è possibile inviare file con caratteri speciali \n cambia il nome del file e riprova\n" + ex.Message);
                         }
                         catch (IOException ex)
                         {
-                            MessageBox.Show("Invio non riuscito: il file che si sta provando a inviare è in uso da un altro processo \n" + ex.Message);
+                            MessageBox.Show("Invio non riuscito  del file " + filename + "\n: il file che si sta provando a inviare è in uso da un altro processo \n" + ex.Message);
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("Ricezione non riuscita: non è stato possibile inviare il file" + ex.Message);
+                            MessageBox.Show("Ricezione non riuscita  del file " + filename + "\n: non è stato possibile inviare il file\n" + ex.Message);
                         }
                     }
 
@@ -462,39 +464,66 @@ namespace Progetto
             }
         }
 
-public void ShowFormSharing()
-{
-    while (!TerminationHandler.Instance.isTerminationRequired())
-    {
-        using (NamedPipeClientStream namedPipeClient = new NamedPipeClientStream("pipe-project"))
+        public void ShowFormSharing()
         {
-            try
+            int pathLength;
+            int numberOfFile = 0;
+            String []filesToSend;
+            // creo la pipe per ricevere i file da inviare
+            while (!TerminationHandler.Instance.isTerminationRequired())
             {
+                using (NamedPipeClientStream namedPipeClient = new NamedPipeClientStream("pipe-project"))
+                {
+               
+                    try
+                    {
+                        // timeout di 5 secondi per connettere la pipe
+                        namedPipeClient.Connect(5000);
+                        // creo un array con i file da inviare con la dimensione che ricevo
+                        numberOfFile = namedPipeClient.ReadByte();
+                        filesToSend = new string[numberOfFile];
+                        for (int i = 0; i < numberOfFile; i++)
+                        {
+                            // metto in ascolto del file
+                            pathLength = namedPipeClient.ReadByte();
+                            Thread.Sleep(100);
+                            byte[] path = new byte[pathLength];
+                            // la lettura da pipe e' bloccante, quindi si aspetta che l'altro processo invii il path
+                            namedPipeClient.Read(path, 0, pathLength);
+                            // prendo il nome del file
+                            filePath = System.Text.Encoding.UTF8.GetString(path);
+                            // lo inserisco nell'array
+                            filesToSend[i] = filePath;
 
-                namedPipeClient.Connect(5000);
-                int pathLength;
+                        }
 
-                pathLength = namedPipeClient.ReadByte();
-                Thread.Sleep(100);
-                byte[] path = new byte[pathLength];
-                // la lettura da pipe e' bloccante, quindi si aspetta che l'altro processo invii il path
-                namedPipeClient.Read(path, 0, pathLength);
-                filePath = System.Text.Encoding.UTF8.GetString(path);
-                FormSharing formSharing = new FormSharing(usersMap, mutex_map);
-                formSharing.ShowDialog(); // controllare corsa critica per show e get dei valori
-                if (formSharing.getSelectedUsers().Count > 0)
-                    ThreadPool.QueueUserWorkItem(this.SendConnection, formSharing.getSelectedUsers());
-                Console.WriteLine("Ricevuto tramite pipe il path " + filePath);
-                namedPipeClient.Close();
-                formSharing.Dispose();
+                        FormSharing formSharing = new FormSharing(usersMap, mutex_map);
+                        // controllare corsa critica per show e get dei valori
+                        if (formSharing.ShowDialog() == DialogResult.OK)
+                        {
+                            if (formSharing.getSelectedUsers().Count > 0)
+                                ThreadPool.QueueUserWorkItem(unused => this.SendConnection(formSharing.getSelectedUsers(), filesToSend));
+                            Console.WriteLine("Ricevuto tramite pipe il path " + filePath);
+                            formSharing.Dispose();
+                        }
+                    }
+                    catch (TimeoutException time)
+                    {
+                        Console.WriteLine("PipeTimeout" + time.Message);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine("La formSHaring si è chiusa dalla x senza selezionare utenti");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Errore nella selezione dei file da inviare - " + ex.Message);
+                    }
+
+                    namedPipeClient.Close();
+                }
             }
-            catch (TimeoutException time)
-            {
-                namedPipeClient.Close();
-            }
+            Console.WriteLine("Thread ShowFormSharing terminated");
         }
-    }
-    Console.WriteLine("Thread ShowFormSharing terminated");
-}
     }
 }
