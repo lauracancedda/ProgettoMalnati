@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 using System.Net;
 using System.Net.Sockets;
@@ -20,7 +16,7 @@ namespace Progetto
         private TcpClient connectedClient;
         private NetworkStream stream;
         private const int BUFFER_SIZE = 1024;
-        private static int TIMEOUT_SOCKET = 10000; // set 10 seconds of timeout
+        private static int TIMEOUT_SOCKET = 10000; // Timeout 10 secondi
 
         public TCPClass()
         {
@@ -43,10 +39,8 @@ namespace Progetto
 
         public void AcceptConnection()
         {
-            // il timeout non funziona con accept
-            // quindi controlliamo se ci sono connessioni da accettare
-            // se non ci sono controllo se devo uscire
-            while(!listener.Pending())
+            // il timeout non funziona con accept: se non ci sono connessioni pendenti non chiama accept
+            while (!listener.Pending())
             {
                 if (TerminationHandler.Instance.isTerminationRequired())
                     return;
@@ -103,14 +97,14 @@ namespace Progetto
             long left = file.LongLength;
             long offset = 0;
 
-            //send size
+            // invio dimensione
             byte[] dimension = BitConverter.GetBytes(dim);
             if (BitConverter.IsLittleEndian == false)
                 Array.Reverse(dimension);
             stream.Write(dimension, 0, dimension.Length);
             Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
 
-            // Send File
+            // invio file
             while (left > 0)
             {
                 if (left >= BUFFER_SIZE)
@@ -128,7 +122,7 @@ namespace Progetto
                 left = left - BUFFER_SIZE;
             }
 
-            // Check if the file was sent correctly
+            // controllo se tutto il file è stato inviato
             if (offset < dim)
                 throw new Exception("Invio interrotto");
             return;
@@ -159,7 +153,7 @@ namespace Progetto
                 received = received + nRead;
             }
 
-            // controllo se tutto il file è stato inviato
+            // controllo se tutto il file è stato ricevuto
             if (received < dim)
                 throw new Exception("Invio interrotto");
 
@@ -187,25 +181,23 @@ namespace Progetto
                 Application.Run(formStatusFile);
             });
             loadingBarThread.Start();
-            //Thread.Sleep(2000);
             try
             {
-                //send size
+                // invio dimensione
                 byte[] dimension = BitConverter.GetBytes(dim);
                 if (BitConverter.IsLittleEndian == false)
                     Array.Reverse(dimension);
                 stream.Write(dimension, 0, dimension.Length);
                 Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
 
-                //Delete File Zip created
+                // elimina file Zip creato
                 if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                     File.Delete(zipFolderPath);
 
-                // Send File
-                // iteriamo fintanto che :
-                //l'utente non chiede di chiudere l'app
-                // l'utente non chiede di terminare dal form di progress bar
-                // rimangono byte da inviare
+                // Continua l'invio fino a quando:
+                // - l'utente non chiude l'app
+                // - l'utente non termina l'invio dal FormStatusFile
+                // - ci sono ancora byte da inviare
                 while (!TerminationHandler.Instance.isTerminationRequired() && !terminateSend && left > 0)
                 {
                     if (left >= BUFFER_SIZE)
@@ -224,7 +216,6 @@ namespace Progetto
                         offset = dim;
                     left = left - BUFFER_SIZE;
 
-                    //if (formStatusFile.InvokeRequired)
                     if (dim < 1024)
                     {
                         formStatusFile.UpdateProgress(ref terminateSend, offset, dim, filePath);
@@ -250,7 +241,7 @@ namespace Progetto
             }
             catch (IOException ex)
             {
-                MessageBox.Show("Errore durante l'invio del file sulla rete. Riprova  \n\n " + ex.Message);
+                MessageBox.Show("Errore durante l'invio del file. Riprova  \n\n " + ex.Message);
             }
 
             if (loadingBarThread != null)
@@ -289,9 +280,6 @@ namespace Progetto
 
             try
             {
-               
-                // inizio un try catch qui perchè qualsiasi cosa accada alla connessione bisogna uscire
-
                 // connessione
                 AcceptConnection();
 
@@ -303,16 +291,13 @@ namespace Progetto
                 file = new byte[dim];
                 Console.WriteLine("dimensione ricevuta: {0}", dim);
 
-                // iteriamo fintanto che :
-                //l'utente non chiede di chiudere l'app
-                // l'utente non chiede di terminare dal form di progress bar
-                // rimangono byte da ricevere
+                // Continua la ricezione  fino a quando:
+                // - l'utente non chiude l'app
+                // - l'utente non termina la ricezione dal FormStatusFile
+                // - ci sono ancora byte da ricevere
                 while (!TerminationHandler.Instance.isTerminationRequired() && !terminateReceive && received < dim)
                 {
                     nRead = stream.Read(buffer, 0, buffer.Length);
-                    // se nRead viene restituita sbagliata in caso di ultimo blocco < 1024 provare soluzione commentata
-                    /*if (nRead != 1024)
-                        nRead = dim - received;*/
                     Array.Copy(buffer, 0, file, received, nRead);
                     received = received + nRead;
                     if (dim < 1024)
@@ -368,11 +353,11 @@ namespace Progetto
             }
             catch (SocketException ex)
             {
-                MessageBox.Show("Errore durante la ricezione del file: controlla la tua connessione \n\n " + ex.Message);
+                MessageBox.Show("Errore durante la ricezione del file: controlla la tua connessione. \n\n " + ex.Message);
             }
             catch (DirectoryNotFoundException ex)
             {
-                MessageBox.Show("Cartella di destinazione non trovata! Se hai selezionato un percorso di ricezione di default assicurati che sia ancora valido  \n\n " + ex.Message);
+                MessageBox.Show("Cartella di destinazione non trovata! Se hai selezionato un percorso di ricezione di default assicurati che sia ancora valido.  \n\n " + ex.Message);
             }
             catch (FileNotFoundException ex)
             {

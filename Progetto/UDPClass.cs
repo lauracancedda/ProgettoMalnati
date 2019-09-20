@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 
@@ -10,11 +7,11 @@ namespace Progetto
 {
     public class UDPClass
     {
-        private IPAddress ipMulticast;          //Ip Gruppo Multicast
-        private UdpClient client;               //client che si occupa di inviare/ricevere la presentazione al gruppo
-        private IPEndPoint remoteEndPoint;      //Ip e porta per inviare la presentazione
-        private IPEndPoint anyEndPoint;         //Ip e porta per ricevere la presentazione
-        private static int TIMEOUT_SOCKET = 10000; // set 10 seconds of timeout
+        private IPAddress ipMulticast;          // Ip Gruppo Multicast
+        private UdpClient client;               // Client che si occupa di inviare/ricevere la presentazione al gruppo
+        private IPEndPoint remoteEndPoint;      // Ip e porta per inviare la presentazione
+        private IPEndPoint anyEndPoint;         // Ip e porta per ricevere la presentazione
+        private static int TIMEOUT_SOCKET = 10000; // Timeout 10 secondi
 
         public UDPClass()
         {
@@ -39,7 +36,7 @@ namespace Progetto
             return portUsed;
         }
 
-        // Invia al gruppo multicast la stringa nome_portImage_portRequest
+        // Invia al gruppo multicast la stringa name_portImage_portRequest
         public void SendPacketMulticast(string s)
         {
             Byte[] data = Encoding.ASCII.GetBytes(s);
@@ -61,7 +58,7 @@ namespace Progetto
             return s;
         }
 
-        // Riceve le informazioni da chiunque sia iscritto al gruppo multicast e le inserisce nella struct valore
+        // Riceve le informazioni da chiunque sia iscritto al gruppo multicast e le inserisce nella struct value
         public Value ReceiveWrapPacket()
         {
             Value val;
@@ -71,7 +68,7 @@ namespace Progetto
 
             val.time = DateTime.Now;
             val.name = values[0];
-            val.ip = anyEndPoint.Address;      //non so se sia l'indirizzo del mittente o del multicast
+            val.ip = anyEndPoint.Address;
             val.photo = null;
             val.portImage = Int32.Parse(values[1]);
             val.portRequest = Int32.Parse(values[2]);
@@ -84,13 +81,13 @@ namespace Progetto
         public IPEndPoint ReceiveConnectionRequest()
         {
             string received = "";
-            //permette di ricevere datagram da ogni sorgente
+            // permette di ricevere datagram da ogni sorgente
             IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
             while (!TerminationHandler.Instance.isTerminationRequired())
             {
                 try
                 {
-                    //bloccante finché non arriva un messaggio dall'host remoto
+                    // bloccante finché non arriva un messaggio dall'host remoto
                     Byte[] receivedBytes = client.Receive(ref RemoteIpEndPoint);
                     received = Encoding.ASCII.GetString(receivedBytes);
                     if (received == "Richiesta Invio")
@@ -102,8 +99,7 @@ namespace Progetto
                 }
                 catch (SocketException ex)
                 {
-                    //TODO log the error timeout here
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("Socket Exception in ReceiveConnectionRequest: " + ex.Message);
                 }
             }
             return null;
