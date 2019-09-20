@@ -14,7 +14,7 @@ namespace Progetto
         private UdpClient client;               //client che si occupa di inviare/ricevere la presentazione al gruppo
         private IPEndPoint remoteEndPoint;      //Ip e porta per inviare la presentazione
         private IPEndPoint anyEndPoint;         //Ip e porta per ricevere la presentazione
-        private static int TIMEOUT_SOCKET = 20000; // set 5 seconds of timeout
+        private static int TIMEOUT_SOCKET = 5000; // set 5 seconds of timeout
 
         public UDPClass()
         {

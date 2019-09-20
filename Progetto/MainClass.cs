@@ -314,7 +314,9 @@ namespace Progetto
                                 path = setting.DefaultPath;
                             }
 
-
+                            // path non selezionato
+                            if (path == null)
+                                continue;
                             path = path + "\\";
 
                             //crea tcp receiver e invia la porta scelta con udp
