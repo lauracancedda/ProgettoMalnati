@@ -53,6 +53,7 @@ namespace Progetto
             // Form layout
             this.Padding = new Padding(5);
             this.BackColor = Color.LightBlue;
+            this.StartPosition = FormStartPosition.CenterScreen;
             drawUsers();
         }
 

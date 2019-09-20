@@ -20,7 +20,7 @@ namespace Progetto
         private TcpClient connectedClient;
         private NetworkStream stream;
         private const int BUFFER_SIZE = 1024;
-        private static int TIMEOUT_SOCKET = 5000; // set 5 seconds of timeout
+        private static int TIMEOUT_SOCKET = 10000; // set 10 seconds of timeout
 
         public TCPClass()
         {

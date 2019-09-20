@@ -55,9 +55,10 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(37, 42);
+            this.label1.Location = new System.Drawing.Point(28, 34);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(109, 20);
+            this.label1.Size = new System.Drawing.Size(93, 17);
             this.label1.TabIndex = 0;
             this.label1.Text = "Nome utente:";
             // 
@@ -65,18 +66,20 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(38, 110);
+            this.label2.Location = new System.Drawing.Point(28, 89);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(98, 20);
+            this.label2.Size = new System.Drawing.Size(83, 17);
             this.label2.TabIndex = 1;
             this.label2.Text = "Foto profilo:";
             // 
             // Browse
             // 
             this.Browse.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.Browse.Location = new System.Drawing.Point(429, 103);
+            this.Browse.Location = new System.Drawing.Point(322, 84);
+            this.Browse.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Browse.Name = "Browse";
-            this.Browse.Size = new System.Drawing.Size(116, 36);
+            this.Browse.Size = new System.Drawing.Size(87, 29);
             this.Browse.TabIndex = 2;
             this.Browse.Text = "Sfoglia";
             this.Browse.UseVisualStyleBackColor = false;
@@ -85,17 +88,19 @@
             // Username
             // 
             this.Username.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Username.Location = new System.Drawing.Point(195, 42);
+            this.Username.Location = new System.Drawing.Point(146, 34);
+            this.Username.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Username.Name = "Username";
-            this.Username.Size = new System.Drawing.Size(234, 27);
+            this.Username.Size = new System.Drawing.Size(176, 23);
             this.Username.TabIndex = 3;
             this.Username.TextChanged += new System.EventHandler(this.Username_TextChanged);
             // 
             // Photo
             // 
-            this.Photo.Location = new System.Drawing.Point(195, 103);
+            this.Photo.Location = new System.Drawing.Point(146, 84);
+            this.Photo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Photo.Name = "Photo";
-            this.Photo.Size = new System.Drawing.Size(168, 135);
+            this.Photo.Size = new System.Drawing.Size(126, 110);
             this.Photo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.Photo.TabIndex = 4;
             this.Photo.TabStop = false;
@@ -104,9 +109,10 @@
             // 
             this.AutomaticReceive.AutoSize = true;
             this.AutomaticReceive.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AutomaticReceive.Location = new System.Drawing.Point(41, 325);
+            this.AutomaticReceive.Location = new System.Drawing.Point(31, 264);
+            this.AutomaticReceive.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.AutomaticReceive.Name = "AutomaticReceive";
-            this.AutomaticReceive.Size = new System.Drawing.Size(322, 24);
+            this.AutomaticReceive.Size = new System.Drawing.Size(270, 21);
             this.AutomaticReceive.TabIndex = 5;
             this.AutomaticReceive.Text = "Accetta automaticamente i file in arrivo";
             this.AutomaticReceive.UseVisualStyleBackColor = true;
@@ -116,9 +122,10 @@
             // 
             this.PrivateMode.AutoSize = true;
             this.PrivateMode.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PrivateMode.Location = new System.Drawing.Point(41, 365);
+            this.PrivateMode.Location = new System.Drawing.Point(31, 297);
+            this.PrivateMode.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.PrivateMode.Name = "PrivateMode";
-            this.PrivateMode.Size = new System.Drawing.Size(359, 24);
+            this.PrivateMode.Size = new System.Drawing.Size(303, 21);
             this.PrivateMode.TabIndex = 6;
             this.PrivateMode.Text = "Modalità privata (non visibile agli altri utenti)";
             this.PrivateMode.UseVisualStyleBackColor = true;
@@ -128,18 +135,20 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(38, 269);
+            this.label3.Location = new System.Drawing.Point(28, 219);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(344, 20);
+            this.label3.Size = new System.Drawing.Size(291, 17);
             this.label3.TabIndex = 7;
             this.label3.Text = "Percorso di ricezione predefinito (opzionale):";
             // 
             // ChooseFolder
             // 
             this.ChooseFolder.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.ChooseFolder.Location = new System.Drawing.Point(429, 260);
+            this.ChooseFolder.Location = new System.Drawing.Point(322, 211);
+            this.ChooseFolder.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.ChooseFolder.Name = "ChooseFolder";
-            this.ChooseFolder.Size = new System.Drawing.Size(115, 40);
+            this.ChooseFolder.Size = new System.Drawing.Size(86, 32);
             this.ChooseFolder.TabIndex = 8;
             this.ChooseFolder.Text = "Scegli";
             this.ChooseFolder.UseVisualStyleBackColor = false;
@@ -149,9 +158,10 @@
             // 
             this.Save.Enabled = false;
             this.Save.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Save.Location = new System.Drawing.Point(237, 448);
+            this.Save.Location = new System.Drawing.Point(178, 364);
+            this.Save.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Save.Name = "Save";
-            this.Save.Size = new System.Drawing.Size(136, 41);
+            this.Save.Size = new System.Drawing.Size(102, 33);
             this.Save.TabIndex = 9;
             this.Save.Text = "Salva";
             this.Save.UseVisualStyleBackColor = true;
@@ -171,10 +181,11 @@
             // Path
             // 
             this.Path.AutoSize = true;
-            this.Path.Location = new System.Drawing.Point(45, 291);
-            this.Path.MinimumSize = new System.Drawing.Size(350, 0);
+            this.Path.Location = new System.Drawing.Point(34, 236);
+            this.Path.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.Path.MinimumSize = new System.Drawing.Size(262, 0);
             this.Path.Name = "Path";
-            this.Path.Size = new System.Drawing.Size(350, 17);
+            this.Path.Size = new System.Drawing.Size(262, 13);
             this.Path.TabIndex = 10;
             // 
             // NotificationIcon
@@ -193,27 +204,27 @@
             this.exitToolStripMenuItem});
             this.AppMenu.Name = "contextMenuStrip1";
             this.AppMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.AppMenu.Size = new System.Drawing.Size(176, 80);
+            this.AppMenu.Size = new System.Drawing.Size(143, 48);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.openToolStripMenuItem.Text = "Impostazioni";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.exitToolStripMenuItem.Text = "Esci";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
             // FormSettings
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(610, 514);
+            this.ClientSize = new System.Drawing.Size(458, 418);
             this.ControlBox = false;
             this.Controls.Add(this.Path);
             this.Controls.Add(this.Save);
@@ -226,7 +237,9 @@
             this.Controls.Add(this.Browse);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "FormSettings";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Impostazioni";
             this.Load += new System.EventHandler(this.FormSettings_Load);
             ((System.ComponentModel.ISupportInitialize)(this.Photo)).EndInit();
