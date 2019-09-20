@@ -238,19 +238,19 @@ namespace Progetto
             }
             catch (SocketException ex)
             {
-                MessageBox.Show("Errore durante la ricezione del file- controlla la connessione \n\n " + ex.Message);
+                MessageBox.Show("Errore durante la ricezione del file: controlla la tua connessione \n\n " + ex.Message);
             }
             catch (DirectoryNotFoundException ex)
             {
-                MessageBox.Show("Path del file/directory non trovato - riprova  \n\n " + ex.Message);
+                MessageBox.Show("Path directory non trovato! Riprova  \n\n " + ex.Message);
             }
             catch (FileNotFoundException ex)
             {
-                MessageBox.Show("Path del file non trovato per estrazione in directory - riprova  \n\n " + ex.Message);
+                MessageBox.Show("Path del file non trovato per estrazione in directory. Riprova  \n\n " + ex.Message);
             }
             catch (IOException ex)
             {
-                MessageBox.Show("Errore nell'invio del file sulla rete - riprova  \n\n " + ex.Message);
+                MessageBox.Show("Errore durante l'invio del file sulla rete. Riprova  \n\n " + ex.Message);
             }
 
             if (loadingBarThread != null)
@@ -368,19 +368,19 @@ namespace Progetto
             }
             catch (SocketException ex)
             {
-                MessageBox.Show("Errore durante la ricezione del file- controlla la connessione \n\n " + ex.Message);
+                MessageBox.Show("Errore durante la ricezione del file: controlla la tua connessione \n\n " + ex.Message);
             }
             catch (DirectoryNotFoundException ex)
             {
-                MessageBox.Show("Path del directory non trovato - riprova  \n\n " + ex.Message);
+                MessageBox.Show("Cartella di destinazione non trovata! Se hai selezionato un percorso di ricezione di default assicurati che sia ancora valido  \n\n " + ex.Message);
             }
             catch (FileNotFoundException ex)
             {
-                MessageBox.Show("Path del file non trovato per estrazione in directory - riprova  \n\n " + ex.Message);
+                MessageBox.Show("Path del file non trovato per estrazione in directory. Riprova  \n\n " + ex.Message);
             }
             catch (IOException ex)
             {
-                MessageBox.Show("Errore nell'invio del file sulla rete - riprova  \n\n " + ex.Message);
+                MessageBox.Show("Errore durante l'invio del file sulla rete. Riprova  \n\n " + ex.Message);
             }
 
             if (loadingBarThread != null)

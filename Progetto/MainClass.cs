@@ -371,7 +371,7 @@ namespace Progetto
                     {
                         udpClient.SendPacket(files.Length.ToString(), udpEndPoint); // Dici quanti file devi inviare
 
-                        for (int j = 0; j < files.Length - 1; j++)
+                        for (int j = 0; j < files.Length; j++)
                         {
                             try
                             {
