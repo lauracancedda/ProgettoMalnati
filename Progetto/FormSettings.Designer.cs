@@ -45,6 +45,7 @@
             this.Path = new System.Windows.Forms.Label();
             this.NotificationIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.AppMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.selectStatus = new System.Windows.Forms.ToolStripComboBox();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.Photo)).BeginInit();
@@ -77,7 +78,7 @@
             // 
             this.Browse.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.Browse.Location = new System.Drawing.Point(322, 84);
-            this.Browse.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Browse.Margin = new System.Windows.Forms.Padding(2);
             this.Browse.Name = "Browse";
             this.Browse.Size = new System.Drawing.Size(87, 29);
             this.Browse.TabIndex = 2;
@@ -89,7 +90,7 @@
             // 
             this.Username.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Username.Location = new System.Drawing.Point(146, 34);
-            this.Username.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Username.Margin = new System.Windows.Forms.Padding(2);
             this.Username.Name = "Username";
             this.Username.Size = new System.Drawing.Size(176, 23);
             this.Username.TabIndex = 3;
@@ -98,7 +99,7 @@
             // Photo
             // 
             this.Photo.Location = new System.Drawing.Point(146, 84);
-            this.Photo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Photo.Margin = new System.Windows.Forms.Padding(2);
             this.Photo.Name = "Photo";
             this.Photo.Size = new System.Drawing.Size(126, 110);
             this.Photo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -110,7 +111,7 @@
             this.AutomaticReceive.AutoSize = true;
             this.AutomaticReceive.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AutomaticReceive.Location = new System.Drawing.Point(31, 264);
-            this.AutomaticReceive.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.AutomaticReceive.Margin = new System.Windows.Forms.Padding(2);
             this.AutomaticReceive.Name = "AutomaticReceive";
             this.AutomaticReceive.Size = new System.Drawing.Size(270, 21);
             this.AutomaticReceive.TabIndex = 5;
@@ -123,7 +124,7 @@
             this.PrivateMode.AutoSize = true;
             this.PrivateMode.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PrivateMode.Location = new System.Drawing.Point(31, 297);
-            this.PrivateMode.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.PrivateMode.Margin = new System.Windows.Forms.Padding(2);
             this.PrivateMode.Name = "PrivateMode";
             this.PrivateMode.Size = new System.Drawing.Size(303, 21);
             this.PrivateMode.TabIndex = 6;
@@ -146,7 +147,7 @@
             // 
             this.ChooseFolder.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.ChooseFolder.Location = new System.Drawing.Point(322, 211);
-            this.ChooseFolder.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ChooseFolder.Margin = new System.Windows.Forms.Padding(2);
             this.ChooseFolder.Name = "ChooseFolder";
             this.ChooseFolder.Size = new System.Drawing.Size(86, 32);
             this.ChooseFolder.TabIndex = 8;
@@ -159,7 +160,7 @@
             this.Save.Enabled = false;
             this.Save.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Save.Location = new System.Drawing.Point(178, 364);
-            this.Save.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Save.Margin = new System.Windows.Forms.Padding(2);
             this.Save.Name = "Save";
             this.Save.Size = new System.Drawing.Size(102, 33);
             this.Save.TabIndex = 9;
@@ -200,23 +201,35 @@
             this.AppMenu.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.AppMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.AppMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.selectStatus,
             this.openToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.AppMenu.Name = "contextMenuStrip1";
             this.AppMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.AppMenu.Size = new System.Drawing.Size(143, 48);
+            this.AppMenu.Size = new System.Drawing.Size(182, 97);
+            // 
+            // selectStatus
+            // 
+            this.selectStatus.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.selectStatus.Items.AddRange(new object[] {
+            "Online",
+            "Offline"});
+            this.selectStatus.Name = "selectStatus";
+            this.selectStatus.Size = new System.Drawing.Size(121, 23);
+            this.selectStatus.Text = "Stato";
+            this.selectStatus.SelectedIndexChanged += new System.EventHandler(this.SelectStatus_SelectedIndexChanged);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.openToolStripMenuItem.Text = "Impostazioni";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.exitToolStripMenuItem.Text = "Esci";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
@@ -237,7 +250,7 @@
             this.Controls.Add(this.Browse);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "FormSettings";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Impostazioni";
@@ -268,5 +281,6 @@
         private System.Windows.Forms.ContextMenuStrip AppMenu;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripComboBox selectStatus;
     }
 }

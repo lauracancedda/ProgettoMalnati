@@ -112,9 +112,15 @@ namespace Progetto
                 setting.AutomaticReceive = false;
             // modalità 
             if (PrivateMode.Checked)
+            {
                 setting.PrivateMode = true;
+                selectStatus.SelectedItem = "Offline";
+            }
             else
+            {
                 setting.PrivateMode = false;
+                selectStatus.SelectedItem = "Online";
+            }
 
             // scrittura su file se qualcosa è cambiato 
             if (file_modified == true || photo_modified == true)
@@ -157,9 +163,14 @@ namespace Progetto
             // modalità 
             line = reader.ReadLine();
             if (line == "yes")
+            {
                 PrivateMode.Checked = true;
-            else
+                selectStatus.SelectedItem = "Offline";
+            }
+            else {
                 PrivateMode.Checked = false;
+                selectStatus.SelectedItem = "Online";
+            }
 
             reader.Close();
 
@@ -218,6 +229,20 @@ namespace Progetto
             setting.UnSetKeyRegedit(pathExecutable);
             // termina tutti i thread e chiude l'applicazione
             Application.Exit();
+        }
+
+        private void SelectStatus_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (selectStatus.SelectedItem == "Online")
+            {
+                setting.PrivateMode = false;
+                PrivateMode.Checked = false;
+            }
+            else
+            {
+                setting.PrivateMode = true;
+                PrivateMode.Checked = true;
+            }
         }
     }
 }
