@@ -18,6 +18,7 @@ namespace Progetto
         {
             InitializeComponent();
             this.RequestText.Text = name + " vorrebbe inviarti un file:";
+            this.RequestText.ImageAlign = ContentAlignment.TopCenter;
         }
 
         public bool GetChoice()

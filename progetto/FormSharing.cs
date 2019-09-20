@@ -161,8 +161,11 @@ namespace Progetto
                     selectedUsers.Add(userCard.val);
                 }
             }
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            if (selectedUsers.Count > 0)
+            {
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
         }
 
         private void FormSharing_Load(object sender, EventArgs e)
