@@ -81,7 +81,6 @@
             this.MinimizeBox = false;
             this.Name = "FormStatusFile";
             this.Text = "Invio File";
-            this.Load += new System.EventHandler(this.FormStatusFile_Load_1);
             this.ResumeLayout(false);
             this.PerformLayout();
 

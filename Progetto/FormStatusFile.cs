@@ -14,10 +14,6 @@ namespace Progetto
     public partial class FormStatusFile : Form
     {
         private bool terminate;
-        // metto un evento sul quale update progress dorme
-        // non appena la grafica viene caricata  posso fare update delle barra
-        //Form1_shown viene chiamata quando la grafica è pronta
-        // non appena la grafica è pronta setto l'evento sul quale updateprogress dorme
         public ManualResetEvent startUpdateProgress;
         public FormStatusFile(String formTitle)
         {
@@ -33,13 +29,14 @@ namespace Progetto
             startUpdateProgress = new ManualResetEvent(false);
         }
 
+        // evento generato quando la grafica è pronta, setta startUpdateProgress per iniziare l'update
         private void Form1_Shown(object sender, EventArgs e)
         {
-            // segnalo che è possibile iniziare il caricamento della barra
+            // è possibile iniziare il caricamento della barra
             startUpdateProgress.Set();
         }
 
-        public void UpdateProgress(ref bool terminateRef, long actualReceived, long dimFile, String FileName)
+        public void UpdateProgress(ref bool terminateRef, long actualReceived, long dimFile, String filename)
         {
             startUpdateProgress.WaitOne();
             if (terminate == true)
@@ -47,15 +44,21 @@ namespace Progetto
                 terminateRef = true;
                 return;
             }
+
+            // mostra solo il nome del file
+            filename = filename.Substring(filename.LastIndexOf('\\') + 1);
+            string format = filename.Substring(filename.LastIndexOf('.'));
+            filename = filename.TrimEnd(format.ToCharArray());
+
             if (!TerminationHandler.Instance.isTerminationRequired())
             {
                 progressBar.BeginInvoke(new Action(() =>
                 {
                     progressBar.Value = ((int)((((long)progressBar.Maximum) * actualReceived) / dimFile));
                     if (dimFile / 1024 == 0)
-                        label1.Text = " Invio in corso: " + actualReceived + "/" + dimFile + " KB" + "\n File: " + FileName;
+                        label1.Text = " Invio in corso: " + actualReceived + "/" + dimFile + " KB" + "\n File: " + filename;
                     else
-                        label1.Text = " Invio in corso: " + actualReceived / 1024 + "/" + dimFile / 1024 + " MB" + "\n File: " + FileName;
+                        label1.Text = " Invio in corso: " + actualReceived / 1024 + "/" + dimFile / 1024 + " MB" + "\n File: " + filename;
                 }));
             }
         }
@@ -67,14 +70,5 @@ namespace Progetto
             this.Close();
         }
 
-        private void FormStatusFile_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void FormStatusFile_Load_1(object sender, EventArgs e)
-        {
-
-        }
     }
 }
