@@ -48,6 +48,8 @@
             this.selectStatus = new System.Windows.Forms.ToolStripComboBox();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteImage = new System.Windows.Forms.Button();
+            this.deletePath = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Photo)).BeginInit();
             this.AppMenu.SuspendLayout();
             this.SuspendLayout();
@@ -77,7 +79,7 @@
             // Browse
             // 
             this.Browse.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.Browse.Location = new System.Drawing.Point(322, 84);
+            this.Browse.Location = new System.Drawing.Point(334, 84);
             this.Browse.Margin = new System.Windows.Forms.Padding(2);
             this.Browse.Name = "Browse";
             this.Browse.Size = new System.Drawing.Size(87, 29);
@@ -146,7 +148,7 @@
             // ChooseFolder
             // 
             this.ChooseFolder.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.ChooseFolder.Location = new System.Drawing.Point(322, 211);
+            this.ChooseFolder.Location = new System.Drawing.Point(334, 212);
             this.ChooseFolder.Margin = new System.Windows.Forms.Padding(2);
             this.ChooseFolder.Name = "ChooseFolder";
             this.ChooseFolder.Size = new System.Drawing.Size(86, 32);
@@ -159,7 +161,7 @@
             // 
             this.Save.Enabled = false;
             this.Save.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Save.Location = new System.Drawing.Point(178, 364);
+            this.Save.Location = new System.Drawing.Point(184, 364);
             this.Save.Margin = new System.Windows.Forms.Padding(2);
             this.Save.Name = "Save";
             this.Save.Size = new System.Drawing.Size(102, 33);
@@ -206,7 +208,7 @@
             this.exitToolStripMenuItem});
             this.AppMenu.Name = "contextMenuStrip1";
             this.AppMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.AppMenu.Size = new System.Drawing.Size(182, 97);
+            this.AppMenu.Size = new System.Drawing.Size(182, 75);
             // 
             // selectStatus
             // 
@@ -233,12 +235,44 @@
             this.exitToolStripMenuItem.Text = "Esci";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
+            // deleteImage
+            // 
+            this.deleteImage.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.deleteImage.Font = new System.Drawing.Font("Comic Sans MS", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.deleteImage.ForeColor = System.Drawing.Color.Red;
+            this.deleteImage.Location = new System.Drawing.Point(427, 84);
+            this.deleteImage.Margin = new System.Windows.Forms.Padding(2, 2, 2, 5);
+            this.deleteImage.Name = "deleteImage";
+            this.deleteImage.Padding = new System.Windows.Forms.Padding(0, 0, 0, 2);
+            this.deleteImage.Size = new System.Drawing.Size(28, 29);
+            this.deleteImage.TabIndex = 11;
+            this.deleteImage.Text = "X";
+            this.deleteImage.UseVisualStyleBackColor = false;
+            this.deleteImage.Click += new System.EventHandler(this.DeleteImage_Click);
+            // 
+            // deletePath
+            // 
+            this.deletePath.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.deletePath.Font = new System.Drawing.Font("Comic Sans MS", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.deletePath.ForeColor = System.Drawing.Color.Red;
+            this.deletePath.Location = new System.Drawing.Point(427, 213);
+            this.deletePath.Margin = new System.Windows.Forms.Padding(2, 2, 2, 5);
+            this.deletePath.Name = "deletePath";
+            this.deletePath.Padding = new System.Windows.Forms.Padding(0, 0, 0, 2);
+            this.deletePath.Size = new System.Drawing.Size(28, 29);
+            this.deletePath.TabIndex = 12;
+            this.deletePath.Text = "X";
+            this.deletePath.UseVisualStyleBackColor = false;
+            this.deletePath.Click += new System.EventHandler(this.DeletePath_Click);
+            // 
             // FormSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(458, 418);
+            this.ClientSize = new System.Drawing.Size(468, 418);
             this.ControlBox = false;
+            this.Controls.Add(this.deletePath);
+            this.Controls.Add(this.deleteImage);
             this.Controls.Add(this.Path);
             this.Controls.Add(this.Save);
             this.Controls.Add(this.ChooseFolder);
@@ -282,5 +316,7 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripComboBox selectStatus;
+        private System.Windows.Forms.Button deleteImage;
+        private System.Windows.Forms.Button deletePath;
     }
 }

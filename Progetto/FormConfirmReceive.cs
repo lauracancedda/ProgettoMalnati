@@ -17,7 +17,7 @@ namespace Progetto
         public FormConfirmReceive(string name)
         {
             InitializeComponent();
-            this.RequestText.Text = name + " vorrebbe inviarti un file:";
+            this.RequestText.Text = "Ricevere file dall'utente " + name + "?";
             this.RequestText.ImageAlign = ContentAlignment.TopCenter;
         }
 

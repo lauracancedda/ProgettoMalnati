@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO;
@@ -67,6 +61,16 @@ namespace Progetto
             }
         }
 
+        private void DeleteImage_Click(object sender, EventArgs e)
+        {
+            if (Photo.Image != null)
+            {
+                Photo.Image.Dispose();
+                Photo.Image = null;
+                Photo.Refresh();
+                photo_modified = true;
+            }
+        }
 
         private void ChooseFolder_Click(object sender, EventArgs e)
         {
@@ -75,6 +79,12 @@ namespace Progetto
                 Path.Text = Folder.SelectedPath;
                 file_modified = true;
             }
+        }
+
+        private void DeletePath_Click(object sender, EventArgs e)
+        {
+            Path.Text = "";
+            file_modified = true;
         }
 
 
@@ -97,8 +107,10 @@ namespace Progetto
             setting.Name = Username.Text;
             // foto
             setting.Photo = Photo.Image;
-            if (photo_modified == true)
+            if (photo_modified == true && Photo.Image != null)
                 setting.PhotoSelected = true;
+            else
+                setting.PhotoSelected = false;
             // percorso di default
             setting.DefaultPath = Path.Text;
             if (Path.Text != "")
@@ -208,8 +220,15 @@ namespace Progetto
             }
 
             // salva l'immagine
-            if (photo_modified == true)
+            if (photo_modified == true && setting.PhotoSelected == true)
                 Photo.Image.Save("immagine.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+
+            // elimina l'immagine esistente se è stata cancellata
+            if (Photo.Image == null)
+            {
+                if (File.Exists("immagine.jpg"))
+                    File.Delete("immagine.jpg");
+            }
         }
 
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -219,6 +238,10 @@ namespace Progetto
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // salva i cambiamenti nelle impostazioni fatti dal menu
+            setting.mutex_setting.WaitOne();
+            SaveOnFile();
+            setting.mutex_setting.ReleaseMutex();
             TerminationHandler.Instance.setTermination();
             setting.publicMode.Set();
             this.NotificationIcon.Dispose();
@@ -227,6 +250,7 @@ namespace Progetto
             var process = Process.GetCurrentProcess();
             string pathExecutable = process.MainModule.FileName;
             setting.UnSetKeyRegedit(pathExecutable);
+
             // termina tutti i thread e chiude l'applicazione
             Application.Exit();
         }
@@ -234,15 +258,15 @@ namespace Progetto
         private void SelectStatus_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (selectStatus.SelectedItem == "Online")
-            {
-                setting.PrivateMode = false;
                 PrivateMode.Checked = false;
-            }
             else
-            {
-                setting.PrivateMode = true;
                 PrivateMode.Checked = true;
-            }
+
+            file_modified = true;
+            setting.mutex_setting.WaitOne();
+            setting.PrivateMode = PrivateMode.Checked;
+            setting.mutex_setting.ReleaseMutex();
         }
+
     }
 }
