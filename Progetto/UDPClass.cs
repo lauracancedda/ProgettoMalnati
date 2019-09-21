@@ -15,7 +15,7 @@ namespace Progetto
 
         public UDPClass()
         {
-            ipMulticast = IPAddress.Parse("224.0.4.0");
+            ipMulticast = IPAddress.Parse("224.0.2.0");
             remoteEndPoint = new IPEndPoint(ipMulticast, 1500);
             anyEndPoint = new IPEndPoint(IPAddress.Any, 1500);
         }

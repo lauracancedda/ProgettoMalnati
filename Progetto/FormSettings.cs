@@ -209,7 +209,7 @@ namespace Progetto
 
             // salva l'immagine
             if (photo_modified == true)
-                Photo.Image.Save("immagine01.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                Photo.Image.Save("immagine.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
         }
 
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
