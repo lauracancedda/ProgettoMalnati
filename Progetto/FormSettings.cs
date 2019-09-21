@@ -101,7 +101,7 @@ namespace Progetto
         // salva i campi del form nelle impostazioni e se necessario anche su file
         private void Save_Click(object sender, EventArgs e)
         {
-            setting.mutex_setting.WaitOne(); //lock
+            setting.mutexSettings.WaitOne(); //lock
 
             // nome
             setting.Name = Username.Text;
@@ -138,7 +138,7 @@ namespace Progetto
             if (file_modified == true || photo_modified == true)
                 SaveOnFile();
 
-            setting.mutex_setting.ReleaseMutex(); // unlock
+            setting.mutexSettings.ReleaseMutex(); // unlock
 
 
             // lancia il thread principale
@@ -190,9 +190,9 @@ namespace Progetto
             if (File.Exists("immagine.jpg"))
             {
                 Photo.Image = new Bitmap(".\\immagine.jpg");
-                setting.mutex_setting.WaitOne();
+                setting.mutexSettings.WaitOne();
                 setting.PhotoSelected = true;
-                setting.mutex_setting.ReleaseMutex();
+                setting.mutexSettings.ReleaseMutex();
                 photo_modified = true;
             }
 
@@ -239,9 +239,9 @@ namespace Progetto
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // salva i cambiamenti nelle impostazioni fatti dal menu
-            setting.mutex_setting.WaitOne();
+            setting.mutexSettings.WaitOne();
             SaveOnFile();
-            setting.mutex_setting.ReleaseMutex();
+            setting.mutexSettings.ReleaseMutex();
             TerminationHandler.Instance.setTermination();
             setting.publicMode.Set();
             this.NotificationIcon.Dispose();
@@ -263,9 +263,9 @@ namespace Progetto
                 PrivateMode.Checked = true;
 
             file_modified = true;
-            setting.mutex_setting.WaitOne();
+            setting.mutexSettings.WaitOne();
             setting.PrivateMode = PrivateMode.Checked;
-            setting.mutex_setting.ReleaseMutex();
+            setting.mutexSettings.ReleaseMutex();
         }
 
     }

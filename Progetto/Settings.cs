@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 using System.Drawing;
-using Microsoft.Win32;
 using System.Text.RegularExpressions;
 using System.IO;
 
@@ -56,13 +51,13 @@ namespace Progetto
         }
 
         // Mutex
-        public Mutex mutex_setting;
+        public Mutex mutexSettings;
         public ManualResetEvent publicMode;
 
 
         public Settings()
         {
-            mutex_setting = new Mutex();
+            mutexSettings = new Mutex();
             publicMode = new ManualResetEvent(false);
         }
 
