@@ -51,6 +51,25 @@ namespace Progetto
             stream = connectedClient.GetStream();
         }
 
+        public bool AcceptConnection(int attempts)
+        {
+            // il timeout non funziona con accept: se non ci sono connessioni pendenti non chiama accept
+            // controlla le connessioni pendenti un numero finito di volte
+            while (!listener.Pending() && attempts > 0)
+            {
+                if (TerminationHandler.Instance.isTerminationRequired())
+                    return false;
+                Thread.Sleep(1000);
+                attempts--;
+            }
+            if (attempts == 0)
+                return false;
+            connectedClient = listener.AcceptTcpClient();
+            connectedClient.Client.ReceiveTimeout = TIMEOUT_SOCKET;
+            stream = connectedClient.GetStream();
+            return true;
+        }
+
         public void CloseConnection()
         {
             stream.Close();
@@ -269,86 +288,93 @@ namespace Progetto
             long nRead;
             Thread loadingBarThread = null;
             bool terminateReceive = false;
-            String formTtitle = "Ricezione file";
+            bool connectionAccepted = false;
+            String formTitle = "Ricezione file";
+
             // lancia la progress bar su un thread separato
-            FormStatusFile formStatusFile = new FormStatusFile(formTtitle);
+            FormStatusFile formStatusFile = new FormStatusFile(formTitle);
             loadingBarThread = new Thread(() =>
             {
                 Application.Run(formStatusFile);
             });
-            loadingBarThread.Start();
 
             try
             {
-                // connessione
-                AcceptConnection();
-
-                // ricezione dimensione
-                stream.Read(receivedDim, 0, receivedDim.Length);
-                if (BitConverter.IsLittleEndian == false)
-                    Array.Reverse(receivedDim);
-                Int64 dim = BitConverter.ToInt64(receivedDim, 0);
-                file = new byte[dim];
-                Console.WriteLine("dimensione ricevuta: {0}", dim);
-
-                // Continua la ricezione  fino a quando:
-                // - l'utente non chiude l'app
-                // - l'utente non termina la ricezione dal FormStatusFile
-                // - ci sono ancora byte da ricevere
-                while (!TerminationHandler.Instance.isTerminationRequired() && !terminateReceive && received < dim)
+                // connessione 5 tentativi
+                connectionAccepted = AcceptConnection(5);
+                if (connectionAccepted == true)
                 {
-                    nRead = stream.Read(buffer, 0, buffer.Length);
-                    Array.Copy(buffer, 0, file, received, nRead);
-                    received = received + nRead;
-                    if (dim < 1024)
-                    {
-                        formStatusFile.UpdateProgress(ref terminateReceive, received, dim, filePath + filename);
-                    }
-                    else
-                    {
-                        formStatusFile.UpdateProgress(ref terminateReceive, received / 1024, dim / 1024, filePath + filename);
-                    }
-                }
+                    loadingBarThread.Start();
 
-                if (!terminateReceive && !TerminationHandler.Instance.isTerminationRequired())
-                {
-                    string format = filename.Substring(filename.LastIndexOf('.'));
-                    filename = filename.TrimEnd(format.ToCharArray());
-                    string modifiedFilename = filename;
-                    //verifica unicità path ed eventualmente lo modifica
-                    int count = 1;
-                    if (fileType == "File")
+                    // ricezione dimensione
+                    stream.Read(receivedDim, 0, receivedDim.Length);
+                    if (BitConverter.IsLittleEndian == false)
+                        Array.Reverse(receivedDim);
+                    Int64 dim = BitConverter.ToInt64(receivedDim, 0);
+                    file = new byte[dim];
+                    Console.WriteLine("dimensione ricevuta: {0}", dim);
+
+                    // Continua la ricezione  fino a quando:
+                    // - l'utente non chiude l'app
+                    // - l'utente non termina la ricezione dal FormStatusFile
+                    // - ci sono ancora byte da ricevere
+                    while (!TerminationHandler.Instance.isTerminationRequired() && !terminateReceive && received < dim)
                     {
-                        while (File.Exists(filePath + modifiedFilename + format) == true)
+                        nRead = stream.Read(buffer, 0, buffer.Length);
+                        Array.Copy(buffer, 0, file, received, nRead);
+                        received = received + nRead;
+                        if (dim < 1024)
                         {
-                            modifiedFilename = filename + "(" + count + ")";
-                            count++;
+                            formStatusFile.UpdateProgress(ref terminateReceive, received, dim, filePath + filename);
+                        }
+                        else
+                        {
+                            formStatusFile.UpdateProgress(ref terminateReceive, received / 1024, dim / 1024, filePath + filename);
                         }
                     }
-                    else
+
+                    if (!terminateReceive && !TerminationHandler.Instance.isTerminationRequired())
                     {
-                        while (Directory.Exists(filePath + modifiedFilename) == true)
+                        string format = filename.Substring(filename.LastIndexOf('.'));
+                        filename = filename.TrimEnd(format.ToCharArray());
+                        string modifiedFilename = filename;
+                        //verifica unicità path ed eventualmente lo modifica
+                        int count = 1;
+                        if (fileType == "File")
                         {
-                            modifiedFilename = filename + "(" + count + ")";
-                            count++;
+                            while (File.Exists(filePath + modifiedFilename + format) == true)
+                            {
+                                modifiedFilename = filename + "(" + count + ")";
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            while (Directory.Exists(filePath + modifiedFilename) == true)
+                            {
+                                modifiedFilename = filename + "(" + count + ")";
+                                count++;
+                            }
+                        }
+                        filePath = filePath + modifiedFilename + format;
+                        if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                        {
+                            zipName = filePath.Substring(filePath.LastIndexOf("\\"));
+                            Directory.CreateDirectory(filePath.Replace(".zip", ""));
+                            filePath = filePath.Replace(".zip", "") + zipName;
+                        }
+
+                        File.WriteAllBytes(filePath, file);
+                        Console.WriteLine("file ricevuto");
+                        if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
+                        {
+                            ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName, ""));
+                            File.Delete(filePath);
                         }
                     }
-                    filePath = filePath + modifiedFilename + format;
-                    if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
-                    {
-                        zipName = filePath.Substring(filePath.LastIndexOf("\\"));
-                        Directory.CreateDirectory(filePath.Replace(".zip", ""));
-                        filePath = filePath.Replace(".zip", "") + zipName;
-                    }
-
-                    File.WriteAllBytes(filePath, file);
-                    Console.WriteLine("file ricevuto");
-                    if ((filePath.Substring(filePath.LastIndexOf(".")) == ".zip") && (fileType == "Directory"))
-                    {
-                        ZipFile.ExtractToDirectory(filePath, filePath.Replace(zipName, ""));
-                        File.Delete(filePath);
-                    }
                 }
+                else
+                    MessageBox.Show("File non ricevuto! L'utente potrebbe essersi disconnesso");
 
             }
             catch (SocketException ex)
@@ -368,14 +394,15 @@ namespace Progetto
                 MessageBox.Show("Errore durante l'invio del file sulla rete. Riprova  \n\n " + ex.Message);
             }
 
-            if (loadingBarThread != null)
+            if (loadingBarThread != null && connectionAccepted)
             {
                 if (formStatusFile.InvokeRequired)
                     formStatusFile.BeginInvoke(new Action(() => { formStatusFile.Close(); }));
                 loadingBarThread.Join();
             }
 
-            CloseConnection();
+            if(connectionAccepted)
+                CloseConnection();
             StopListener();
 
             return;

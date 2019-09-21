@@ -107,7 +107,7 @@ namespace Progetto
             setting.Name = Username.Text;
             // foto
             setting.Photo = Photo.Image;
-            if (photo_modified == true && Photo.Image != null)
+            if (Photo.Image != null)
                 setting.PhotoSelected = true;
             else
                 setting.PhotoSelected = false;
