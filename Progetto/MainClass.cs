@@ -137,6 +137,7 @@ namespace Progetto
             v.portImage = val.portImage;
             v.portRequest = val.portRequest;
             v.ip = ip;
+            v.photo = null;
 
             if (usersMap.ContainsKey(ip))
             {
@@ -147,22 +148,29 @@ namespace Progetto
             else
             {
                 //Utente non presente, richiedo la foto
-                TCPClass tcpclass = new TCPClass();
-                tcpclass.CreateRequester();
-                tcpclass.Connect(ip, val.portImage);
-                tcpclass.SendMessage("Richiesta Foto");
+                try
+                {
+                    TCPClass tcpclass = new TCPClass();
+                    tcpclass.CreateRequester();
+                    tcpclass.Connect(ip, val.portImage);
+                    tcpclass.SendMessage("Richiesta Foto");
 
-                string response = tcpclass.ReceiveMessage(2);
-                if (response == "ok")
-                {
+                    string response = tcpclass.ReceiveMessage(2);
                     // foto presente
-                    MemoryStream ms = new MemoryStream(tcpclass.ReceiveFile());
-                    v.photo = Image.FromStream(ms);
-                    v.photo.Save(v.ip.ToString() + "_" + v.name);
+                    if (response == "ok")
+                    {
+                        MemoryStream ms = new MemoryStream(tcpclass.ReceiveFile());
+                        v.photo = Image.FromStream(ms);
+                        v.photo.Save(v.ip.ToString() + "_" + v.name);
+                    }
                 }
-                else
+                catch (SocketException ex)
                 {
-                    v.photo = null;
+                    Console.WriteLine("SocketException in MapRefresh: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception in MapRefresh: " + ex.Message);
                 }
 
                 //aggiungo il nuovo utente
@@ -246,17 +254,28 @@ namespace Progetto
                 tcpImageSender.AcceptConnection();
                 if (!TerminationHandler.Instance.isTerminationRequired())
                 {
-                    string request = tcpImageSender.ReceiveMessage(14);
-                    if (setting.PhotoSelected == true)
+                    try
                     {
-                        tcpImageSender.SendMessage("ok");
-                        MemoryStream ms = new MemoryStream();
-                        setting.Photo.Save(ms, setting.Photo.RawFormat);
-                        tcpImageSender.SendFile(ms.ToArray());
+                        string request = tcpImageSender.ReceiveMessage(14);
+                        if (setting.PhotoSelected == true)
+                        {
+                            tcpImageSender.SendMessage("ok");
+                            MemoryStream ms = new MemoryStream();
+                            setting.Photo.Save(ms, setting.Photo.RawFormat);
+                            tcpImageSender.SendFile(ms.ToArray());
+                        }
+                        else
+                        {
+                            tcpImageSender.SendMessage("no");
+                        }
                     }
-                    else
+                    catch (SocketException ex)
                     {
-                        tcpImageSender.SendMessage("no");
+                        Console.WriteLine("SocketException in ProvidePhoto: " + ex.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Exception in ProvidePhoto: " + ex.Message);
                     }
                     tcpImageSender.CloseConnection();
                 }
