@@ -17,8 +17,8 @@ namespace Progetto
         public FormConfirmReceive(string name)
         {
             InitializeComponent();
-            this.RequestText.Text = "Ricevere file dall'utente " + name + "?";
-            this.RequestText.ImageAlign = ContentAlignment.TopCenter;
+            this.RequestText.Text = "Ricevere file da " + name + "?";
+            this.RequestText.Anchor = AnchorStyles.Top;
         }
 
         public bool GetChoice()
@@ -38,9 +38,5 @@ namespace Progetto
             this.Close();
         }
 
-        private void FormConfirmReceive_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

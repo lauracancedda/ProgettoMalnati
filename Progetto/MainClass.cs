@@ -161,7 +161,6 @@ namespace Progetto
                     {
                         MemoryStream ms = new MemoryStream(tcpclass.ReceiveFile());
                         v.photo = Image.FromStream(ms);
-                        v.photo.Save(v.ip.ToString() + "_" + v.name);
                     }
                 }
                 catch (SocketException ex)
@@ -306,7 +305,7 @@ namespace Progetto
                         if (usersMap.TryGetValue(remote.Address, out requester) == true)
                             reqName = requester.name;
                         else
-                            reqName = "Un utente privato";
+                            reqName = "un utente privato";
 
                         // chiede conferma di ricezione se non è automatica
                         if (setting.AutomaticReceive == false)
@@ -388,13 +387,13 @@ namespace Progetto
             foreach (Value user in usersSelected)
             {
                 try
-                {   // ho bisogno di catchare nel caso in cui il ricevitore non risponsa entro il limite di tempo
+                {   // eccezione nel caso in cui il ricevitore non risponda entro il limite di tempo
                     IPEndPoint udpEndPoint = new IPEndPoint(user.ip, user.portRequest);
                     udpClient.SendConnectionRequest(udpEndPoint);
                     string answer = udpClient.ReceivePacket(udpEndPoint);
                     if (answer == "YES")
                     {
-                        udpClient.SendPacket(files.Length.ToString(), udpEndPoint); // Dici quanti file devi inviare
+                        udpClient.SendPacket(files.Length.ToString(), udpEndPoint); // quanti file sta per inviare
 
                         for (int j = 0; j < files.Length; j++)
                         {
@@ -404,7 +403,7 @@ namespace Progetto
                                 attributes = File.GetAttributes(files[j]);
                                 dimForCheck = 0;
                                 bool isCompressedCopy = false;
-                                // voglio avvisare che il file che l'utente sta per inviare è grande ne prendo la dimensione
+                                // controllo dimensione file che l'utente sta per inviare
                                 if (attributes.HasFlag(FileAttributes.Directory))
                                 {
                                     dimForCheck = Directory.GetFiles(files[j], "*", SearchOption.AllDirectories).Sum(t => (new FileInfo(t).Length));
@@ -415,7 +414,7 @@ namespace Progetto
                                     dimForCheck = file.LongLength;
                                 }
 
-                                // controllo se la dimensione è piu grande di un GB
+                                // avviso se la dimensione è piu grande di un GB
                                 if (dimForCheck > oneGigabyte)
                                 {
                                     DialogResult dialogResult = MessageBox.Show("Il file che stai provando ad inviare è molto grande: " +
@@ -442,6 +441,7 @@ namespace Progetto
                                     isCompressedCopy = true;
                                 }
 
+                                // invio nome e tipo
                                 udpClient.SendPacket(filename, udpEndPoint);
                                 if (attributes.HasFlag(FileAttributes.Directory))
                                     udpClient.SendPacket("Directory", udpEndPoint);
@@ -499,6 +499,7 @@ namespace Progetto
             }
         }
 
+        // Attende sulla pipe e mostra gli utenti online quando si condividono i file
         public void ShowFormSharing()
         {
             int pathLength;
@@ -520,7 +521,6 @@ namespace Progetto
                         for (int i = 0; i < numberOfFile; i++)
                         {
                             pathLength = namedPipeClient.ReadByte();
-                            Thread.Sleep(100);
                             byte[] path = new byte[pathLength];
                             // la lettura da pipe e' bloccante, quindi si aspetta che l'altro processo invii i path
                             namedPipeClient.Read(path, 0, pathLength);

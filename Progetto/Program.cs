@@ -42,8 +42,6 @@ namespace Progetto
                         // invia la dimensione del path del file
                         length = bytes.Length;
                         namedPipeServer.WriteByte(BitConverter.GetBytes(length)[0]);
-                        // perchè questa sleep?
-                        Thread.Sleep(100);
                         // invia il path del file
                         namedPipeServer.Write(bytes, 0, bytes.Length);
                         Console.WriteLine("Path file inviato");

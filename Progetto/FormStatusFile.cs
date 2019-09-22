@@ -57,7 +57,7 @@ namespace Progetto
         }
 
 
-        private void cancel_Click(object sender, EventArgs e)
+        private void Cancel_Click(object sender, EventArgs e)
         {
             terminate = true;
             this.Close();

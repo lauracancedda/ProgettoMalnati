@@ -81,7 +81,6 @@
             this.Name = "FormConfirmReceive";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Ricezione File";
-            this.Load += new System.EventHandler(this.FormConfirmReceive_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

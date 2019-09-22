@@ -65,7 +65,7 @@
             this.Cancel.TabIndex = 2;
             this.Cancel.Text = "Annulla";
             this.Cancel.UseVisualStyleBackColor = true;
-            this.Cancel.Click += new System.EventHandler(this.cancel_Click);
+            this.Cancel.Click += new System.EventHandler(this.Cancel_Click);
             // 
             // FormStatusFile
             // 
