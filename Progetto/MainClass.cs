@@ -403,6 +403,7 @@ namespace Progetto
                                 filename = files[j].Substring(files[j].LastIndexOf('\\')).Replace("\\", "");
                                 attributes = File.GetAttributes(files[j]);
                                 dimForCheck = 0;
+                                bool isCompressedCopy = false;
                                 // voglio avvisare che il file che l'utente sta per inviare è grande ne prendo la dimensione
                                 if (attributes.HasFlag(FileAttributes.Directory))
                                 {
@@ -438,6 +439,7 @@ namespace Progetto
                                     ZipFile.CreateFromDirectory(files[j], zipFolderPath);
                                     filename = filename + ".zip";
                                     files[j] = zipFolderPath;
+                                    isCompressedCopy = true;
                                 }
 
                                 udpClient.SendPacket(filename, udpEndPoint);
@@ -455,7 +457,8 @@ namespace Progetto
                                 tcpSender.Connect(user.ip, Int32.Parse(tcpPort));
 
                                 // sgancia thread invio tcp
-                                ThreadPool.QueueUserWorkItem(tcpSender.SendFileBuffered, files[j]);
+                                string name = files[j];
+                                ThreadPool.QueueUserWorkItem(unused => tcpSender.SendFileBuffered(name, isCompressedCopy));
                             }
                             catch (SocketException ex)
                             {

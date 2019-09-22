@@ -53,7 +53,7 @@ namespace Progetto
 
         public bool AcceptConnection(int attempts)
         {
-            // il timeout non funziona con accept: se non ci sono connessioni pendenti non chiama accept
+            // il timeout non funziona con accept: se non ci sono connessioni pendenti non viene chiamata
             // controlla le connessioni pendenti un numero finito di volte
             while (!listener.Pending() && attempts > 0)
             {
@@ -180,11 +180,9 @@ namespace Progetto
             return file;
         }
 
-        public void SendFileBuffered(object f)
+        public void SendFileBuffered(string filePath, bool isCompressedCopy)
         {
-            string filePath = (string) f;
             FileAttributes attr = File.GetAttributes(filePath);
-            string zipFolderPath = "";
             byte[] file = File.ReadAllBytes(filePath);
             byte[] buffer = new byte[BUFFER_SIZE];
             Int64 dim = file.LongLength;
@@ -208,10 +206,6 @@ namespace Progetto
                     Array.Reverse(dimension);
                 stream.Write(dimension, 0, dimension.Length);
                 Console.WriteLine("dimensione inviata su {0} byte: {1}", dimension.Length, dim);
-
-                // elimina file Zip creato
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                    File.Delete(zipFolderPath);
 
                 // Continua l'invio fino a quando:
                 // - l'utente non chiude l'app
@@ -242,9 +236,10 @@ namespace Progetto
                     else {
                         formStatusFile.UpdateProgress(ref terminateSend, offset/1024, dim/1024, filePath);
                     }
-                   
                 }
-
+                // elimina la cartella compressa temporanea
+                if (isCompressedCopy)
+                    File.Delete(filePath);
             }
             catch (SocketException ex)
             {
